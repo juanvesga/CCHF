@@ -1,0 +1,99 @@
+# Work version  #  Juan Vesga 5 Aug 2021
+# Script to run a single set of theta values against observed data 
+
+rm(list = ls()) 
+
+library(Hmisc)
+library(reshape2)
+library(zoo)
+library(plyr)
+library(ggplot2)
+library(gmodels)
+library(data.table)
+library(devtools)
+library(fitR)
+library(coda)
+library(deSolve)
+library(mvtnorm)
+library(ISOweek)
+library(lubridate)
+library(dplyr)
+library(zoo)
+library(stringr)
+library(here)
+library (Rcpp)
+library(profvis)
+
+
+country<- "AFG"
+
+########################################################################################
+# Part 1. Import set up: Load data and model parameters and functions
+########################################################################################
+# All required functions
+source(here("src","setup_data.R"))
+source(here("src","setup_model.R"))
+source(here("src","get_sim_results.R"))
+source(here("src","plot_fits_function.R"))
+
+
+#Rcpp vectorized functions
+source(here("src","make_model.R"))
+source(here("src","get_objective_vectorized.R"))
+source(here("src","goveqs_basis_rcpp.R"))
+sourceCpp(here("src","compute_model_arma.cpp"))
+
+#R vectorized options
+# source(here("src","make_model.R"))
+# source(here("src","get_objective_vectorized.R"))
+# source(here("src","goveqs_basis.R"))
+
+#R yearly age ODEs )not vectorized)
+# source(here("src","get_objective.R"))
+# source(here("src","seir_model_ageing.R"))
+
+
+###########################################################################################################
+# PART 1. Define theta 
+###########################################################################################################
+# theta <- data.frame(
+#   A=0.082934908	, # driving temperature dependent force of infection
+#   F_risk=0.447829768	, # risk for farmers
+#   O_factor=0.651265489)#
+# 
+# theta <- data.frame(
+#   A=0.08	, # driving temperature dependent force of infection
+#   F_risk=0.8	, # risk for farmers
+#   O_factor=0.4)#
+
+
+
+# Load poertirs and use median of traces
+# Load posterior samples
+posteriors <- read.table(here("output",country,"posteriors.txt"), sep = "\t" )
+
+theta_in<-posteriors%>%
+  select(A,F_risk, O_factor)
+
+theta <- data.frame(
+  A= median(theta_in$A)	, # driving temperature dependent force of infection
+  F_risk=median(theta_in$F_risk)	, # risk for farmers
+  O_factor=mean(theta_in$O_factor))#
+
+
+sim<-get_sim_results(theta)
+
+ pdf(here("output",country,"model_proj_3motickcycle.pdf")) 
+
+plot_fits_function(sim,observations)
+
+ dev.off() 
+
+
+
+
+
+
+
+
+

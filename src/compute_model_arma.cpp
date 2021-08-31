@@ -1,0 +1,62 @@
+#include <RcppArmadillo.h>
+
+
+// [[Rcpp::depends(RcppArmadillo)]]
+
+// [[Rcpp::export]]
+arma::vec compute_model(
+    const arma::vec& invec, 
+    const arma::mat& lambda, 
+    const arma::mat& linear, 
+    const arma::mat& nlin_livestock, 
+    const arma::mat& nlin_farmer,
+    const arma::mat& nlin_other,
+    Rcpp::Function func,
+    const arma::vec& mortvec,
+    double birth_livestock,
+    double birth_farmer,
+    double birth_other,
+    int n_aux,
+    arma::uvec sus_a1_liv_indx,
+    arma::uvec sus_farmer_indx,
+    arma::uvec sus_other_indx, 
+    arma::uvec aux_inc_indx,
+    arma::uvec aux_mort_indx,
+    const arma::mat& agg_inc,
+    const arma::mat& agg_mort,
+    const arma::mat& sel_inc,
+    double t) {
+  // -- Get force of infection
+  arma::vec lam = lambda*invec;
+  
+  // -- Get all model components together
+  Rcpp::NumericVector temperature_r_factor = func(t);
+  arma::mat allmat (linear +  
+    lam(0) * nlin_livestock * temperature_r_factor[0] +
+    lam(1) * nlin_farmer +
+    lam(2) * nlin_other);
+  
+  
+  arma::vec dx = allmat*invec;
+  
+  // Implement deaths
+  arma::vec morts = mortvec%invec;
+  dx = dx - morts;
+  
+  //  Implement births
+  
+  dx(sus_a1_liv_indx) = dx(sus_a1_liv_indx)+birth_livestock ;
+  dx(sus_farmer_indx) = dx(sus_farmer_indx)+birth_farmer ;
+  dx(sus_other_indx)  = dx(sus_other_indx)+birth_other ;
+  
+  
+  // Get the auxiliaries
+  arma::vec ou(n_aux, arma::fill::zeros);
+  arma::vec out;  
+  out= arma::join_cols(dx,ou);
+  out(aux_inc_indx)         = agg_inc*(sel_inc%allmat)*invec;
+  out(aux_mort_indx)        = agg_mort*morts;
+  
+  return out;
+  
+}
