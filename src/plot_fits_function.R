@@ -32,7 +32,7 @@ plot_fits_function<-function(sim,observations){
       geom_errorbar(data=l_prev_qtls,aes(x=x+0.25,ymin=`2.5%`, ymax=`97.5%`), width=.2,
                     position=position_dodge(.9), col="red")+
       ylab("Prevalence") +
-      scale_x_discrete(name ="Livestock age (yrs)", limits=c("1","","2","","3","","4","","5",""))+
+      scale_x_discrete(name ="Livestock age (yrs)", limits=c("0-1","","1-2","","2-3","","3-4","","4+",""))+
       ylim(c(0,1))
     
     
@@ -92,14 +92,15 @@ plot_fits_function<-function(sim,observations){
                      prev=observations$prev_liv_age,
                      low=observations$prev_liv_age_low_ci,
                      up=observations$prev_liv_age_up_ci)
-    df_s<-data.frame(x=x_s,prev=as.numeric(sim$l_prev_age))
+    df_s<-data.frame(x=x_d,prev=as.numeric(sim$l_prev_age))
     
     p1 <- ggplot(data=df_d,aes(x=x))+ 
       geom_point(aes(y=prev))+
       geom_errorbar(aes(ymin=low, ymax=up), width=.2,position=position_dodge(.9)) + 
-      geom_segment(data=df_s, aes(x = x, y=prev , xend = x+0.5, yend = prev), col="red")+
+      # geom_segment(data=df_s, aes(x = x, y=prev , xend = x+0.5, yend = prev), col="red")+
+      geom_line(data=df_s, aes(x = x, y=prev), col="blue")+
       ylab("Prevalence") +
-      scale_x_discrete(name ="Livestock age (yrs)", limits=c("1","","2","","3","","4","","5",""))+
+      scale_x_discrete(name ="Livestock age (yrs)", limits=c("0-1","","1-2","","2-3","","3-4","","4+",""))+
       ylim(c(0,1))
     
     

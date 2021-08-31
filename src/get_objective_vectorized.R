@@ -2,8 +2,13 @@ get_objective<-function(params,methd_intgr="euler"){
   
   # Initial conditions
   ###########################################################################################################
+  init_prev<-sum(params$imm_t0*params$pop_st*params$N_liv)/params$N_liv
+  prev_vec<-rep(0,5) 
+  prev_vec[1]<-init_prev
+  
   states_ini <- c(
-    L_S = (1-params$imm_t0)*params$pop_st*params$N_liv - params$pop_st,
+    L_Ri= prev_vec[1]*(1-params$imm_t0[1])*params$pop_st[1]*params$N_liv , 
+    L_S = (1-prev_vec)*(1-params$imm_t0)*params$pop_st*params$N_liv - params$pop_st,
     L_I = params$pop_st,
     L_R = params$imm_t0*params$pop_st*params$N_liv,
     

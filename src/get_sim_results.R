@@ -53,14 +53,14 @@ get_sim_results<- function(theta){
     
     
     # Livestock prevalence by age 
-    L_1<-out$L_S1+out$L_I1+out$L_R1
+    L_1<-out$L_S1+out$L_I1+out$L_R1+out$L_Ri
     L_2<-out$L_S2+out$L_I2+out$L_R2
     L_3<-out$L_S3+out$L_I3+out$L_R3
     L_4<-out$L_S4+out$L_I4+out$L_R4
     L_5<-out$L_S5+out$L_I5+out$L_R5
     
     simu_age_R<-c(
-      mean(out$L_R1[(field_work_start:field_work_end)]),
+      mean(out$L_R1[(field_work_start:field_work_end)]+out$L_Ri[(field_work_start:field_work_end)]),
       mean(out$L_R2[(field_work_start:field_work_end)]),
       mean(out$L_R3[(field_work_start:field_work_end)]),
       mean(out$L_R4[(field_work_start:field_work_end)]),
@@ -75,7 +75,7 @@ get_sim_results<- function(theta){
     
     l_prev_age[jj,] <- simu_age_R / simu_age_N
     
-    simu_all_R<-c(out$L_R1+out$L_R2+out$L_R3+out$L_R4+out$L_R5)
+    simu_all_R<-c(out$L_Ri+out$L_R1+out$L_R2+out$L_R3+out$L_R4+out$L_R5)
     simu_all_N<-c(L_1+L_2+L_3+L_4+L_5)
     l_prev_all_long[jj,]<-simu_all_R/simu_all_N
     simu_all_R<-mean(simu_all_R[(field_work_start:field_work_end)])

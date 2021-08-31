@@ -8,16 +8,18 @@ source(here("src","get_addresses.R"))
 gps<-list( age=c('a1','a2','a3','a4','a5'),
            occ=c('farmer','other'))
 
-
-states1 = c('L_S','L_I','L_R')
-states2 = c('S','E','I','R')
+states0 <- c('L_Ri')
+states1 <- c('L_S','L_I','L_R')
+states2 <- c('S','E','I','R')
 
 
 # use addresses function to map states and indexes
 i<-list()
 s<-list()
-groups<-list(states1,gps$age)
+groups<-list(states0)
 ref<- get_addresses(groups, i, s, 0)
+groups<-list(states1,gps$age)
+ref<- get_addresses(groups, ref$i, ref$s, ref$i$nstates)
 groups<-list(states2,gps$occ)
 ref<-  get_addresses(groups, ref$i, ref$s, ref$i$nstates)
 
@@ -36,7 +38,7 @@ ref$i$nx <- lim_all
 
 #States
 ref$s$infectious_l <- c(ref$s$L_I)
-ref$s$livestock   <- c(ref$s$L_S,ref$s$L_I,ref$s$L_R)
+ref$s$livestock   <- c(ref$s$L_Ri, ref$s$L_S,ref$s$L_I,ref$s$L_R)
 ref$s$humans      <- c(ref$s$farmer, ref$s$other)
 ref$s$prevalent_l <- c(ref$s$L_R)
 ref$s$prevalent_f <- c(ref$i$R$farmer)
@@ -115,6 +117,8 @@ params<-list(
   # Duration of infectiousness in livestock (in days)
   D_inf_L = 7,
   
+  D_lact_liv=180, #(days)
+  
   # 2.2. Parameters for humans
   ###########################################################################################################
   # total population of farmers checked from world bank and USAID report from 2008 - 30% pop farmers
@@ -150,7 +154,7 @@ params$time_immune_livestock <- 1/params$D_inf_L # rate at which infectious live
 params$time_to_infous <- 1/params$D_lat_H # rate at which latent human become infectious
 params$time_immune_human <- 1/params$D_inf_H # rate at which infectious human become immune
 params$time_susceptible_human <- 1/params$D_imm_H # rate at which humans become susceptible again
-
+params$time_passimm_loss_livestock<- 1/params$D_lact_liv # rate of moving from passive immnity at birth to susceptible
 
 # Added parameters defined with others 
 params$indices_infL<- c(6,7,8,9,10)-1

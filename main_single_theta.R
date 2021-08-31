@@ -83,11 +83,11 @@ theta <- data.frame(
 
 sim<-get_sim_results(theta)
 
- pdf(here("output",country,"model_proj_3motickcycle.pdf")) 
+ # pdf(here("output",country,"model_proj_3motickcycle.pdf")) 
 
 plot_fits_function(sim,observations)
 
- dev.off() 
+ # dev.off() 
 
 
 
