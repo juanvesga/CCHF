@@ -23,9 +23,11 @@ library(stringr)
 library(here)
 library (Rcpp)
 library(profvis)
+library(matrixStats)
 
 
 country<- "AFG"
+test_mode=0 # Set to 1 to run test parameter values
 
 ########################################################################################
 # Part 1. Import set up: Load data and model parameters and functions
@@ -56,29 +58,30 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 ###########################################################################################################
 # PART 1. Define theta 
 ###########################################################################################################
-# theta <- data.frame(
-#   A=0.082934908	, # driving temperature dependent force of infection
-#   F_risk=0.447829768	, # risk for farmers
-#   O_factor=0.651265489)#
-# 
-# theta <- data.frame(
-#   A=0.08	, # driving temperature dependent force of infection
-#   F_risk=0.8	, # risk for farmers
-#   O_factor=0.4)#
+if (test_mode==1){
+  theta <- data.frame(
+    A=0.076, # driving temperature dependent force of infection
+    F_risk=0.54 , # risk for farmers
+    O_factor=0.45,
+    imm_p=0.6)
+}else{
 
-
-
-# Load poertirs and use median of traces
 # Load posterior samples
 posteriors <- read.table(here("output",country,"posteriors.txt"), sep = "\t" )
 
 theta_in<-posteriors%>%
-  select(A,F_risk, O_factor)
+  select(A,F_risk, O_factor, imm_p)
 
 theta <- data.frame(
   A= median(theta_in$A)	, # driving temperature dependent force of infection
   F_risk=median(theta_in$F_risk)	, # risk for farmers
-  O_factor=mean(theta_in$O_factor))#
+  O_factor=median(theta_in$O_factor),
+  imm_p=median(theta_in$imm_p))#
+
+
+}
+
+
 
 
 sim<-get_sim_results(theta)

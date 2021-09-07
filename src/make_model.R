@@ -12,6 +12,9 @@ make_model<-function(p){
   source <- s$L_Ri; destin <- intersect(s$L_S,s$a1); rate <- p$time_passimm_loss_livestock
   m[ cbind(destin, source) ] <- m[ cbind(destin, source) ]+rate
   
+  # Lost of acquired immunity 
+  source <- s$L_R; destin <- s$L_S; rate <- p$time_susceptible_livestock
+  m[ cbind(destin, source) ] <- m[ cbind(destin, source) ]+rate
   
 
   # Livestock immunity after infection

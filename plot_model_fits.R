@@ -24,6 +24,9 @@ library(here)
 library (Rcpp)
 library(matrixStats)
 
+country<- "SA"
+
+
 ########################################################################################
 # Part 1. Import set up: Load data and model parameters and functions
 ########################################################################################
@@ -40,27 +43,33 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 # source(here("src","get_objective_vectorized.R"))
 # source(here("src","goveqs_basis.R"))
 
-country<- "AFG"
+
 
 ##################################
 
 # Load posterior samples
-posteriors <- read.table(here("output",country,"posteriors_2008_2014.txt"), sep = "\t" )
-theta_in<-posteriors%>%
-  select(A,F_risk, O_factor)
+posteriors <- read.table(here("output",country,"posteriors.txt"), sep = "\t" )
+theta<-posteriors%>%
+  select(A,F_risk, O_factor,imm_p)
 
 
 ## Run model 
-sim<-get_sim_results(theta_in)
+
+sim<-get_sim_results(theta)
+
 saveRDS(sim, file=here("output",country,"simulations.rds"))
 
 # ... or load previously saved sim results
 sim<-readRDS(here("output",country,"simulations.rds"))
 
-pdf(here("output",country,"model_fits.pdf")) 
+  pdf(here("output",country,"model_fits.pdf")) 
 
 plot_fits_function(sim,observations)
 
-dev.off() 
+   dev.off() 
+
+
+
+
 
 
