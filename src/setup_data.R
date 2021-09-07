@@ -36,13 +36,13 @@ if(country=="AFG"){
 }
 
 
-
 human_inc2 <- read.csv(here("data",country,"cchf_human05_14.csv"))#, sep=,)
 head(human_inc2, 15)
 
 human_inc2$time <- c(1:nrow(human_inc2))
 human_inc2$dates <- as.Date(human_inc2$date, format="%d/%m/%Y")
-human_inc2$week <- strftime(human_inc2$dates, format = "%Y-W%V")
+# human_inc2$week <- strftime(human_inc2$dates, format = "%Y-W%V")
+human_inc2$week <- ISOweek(human_inc2$dates)
 head(human_inc2)
 human_inc <- human_inc2[human_inc2$dates>=temp_start_date,]
 human_inc$time <- c(1:nrow(human_inc))
@@ -100,10 +100,11 @@ soil_t<- temp_day$Temperature
 
 
 # Data object for calibartion and plotting
-tmp<-data.frame(date = seq( temp_start_date, by=1, len=length(human_inc$obs)),
+dat<-seq( temp_start_date, by=1, len=length(human_inc$obs))
+tmp<-data.frame(date = dat,
                    time = c(1:(length(human_inc$obs))),
                    cases=human_inc$obs,
-                   week=rep(seq(length(human_inc$obs)), each=7, length.out=length(human_inc$obs)))
+                   week=ISOweek(dat))
 
 tmp2<-tmp%>%
   group_by(week)%>%
@@ -115,7 +116,10 @@ ind_h<-which(!is.na(tmp2$reported))
 
 
 observations<-list(
+  
+  start_date=temp_start_date,
   h_inc_week.x = ind_h,
+  h_inc_week.yw = tmp2$week[ind_h],
   h_inc_week = tmp2$reported[ind_h],
   
   
@@ -152,7 +156,17 @@ observations<-list(
 #Functions
 
 # Find FOI factor according to Soil temperature
-temp_foi_func<-function(x,temp_foi_factor,min_limit=min(soil_t)){
-  x<-(temp_foi_factor*(min(x,30) - min_limit))
+# temp_foi_func<-function(celsius,temp_foi_factor,min_limit=min(soil_t)){
+#   if (celsius<=30){
+#     x<-(temp_foi_factor*(celsius - min_limit))
+# 
+#   }else if(celsius>30){
+#     x<-temp_foi_factor*(30-(celsius-30)-min_limit)
+#   }
+#   return(x)
+# }
+# 
+temp_foi_func<-function(celsius,temp_foi_factor,min_limit=min(soil_t)){
+    x<-(temp_foi_factor*(min(celsius,30) - min_limit))
   return(x)
 }
