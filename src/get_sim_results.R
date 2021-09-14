@@ -23,7 +23,10 @@ get_sim_results<- function(theta){
     params$theta <- c(A=theta$A[jj], 
                       F_risk=theta$F_risk[jj], 
                       O_factor=theta$O_factor[jj],
-                      imm_p=theta$imm_p[jj])
+                      imm_p=theta$imm_p[jj],
+                      knot1=theta$knot1[jj],
+                      knot2=theta$knot2[jj],
+                      beta1=theta$beta1[jj])
     # Risk of transmission in other occupations
     params$risk_O <-params$theta[["O_factor"]]*params$theta[["F_risk"]]
     params$imm_t0<-params$imm_t0_bulgaria*params$theta[["imm_p"]]

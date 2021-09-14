@@ -12,6 +12,7 @@ arma::vec compute_model(
     const arma::mat& nlin_farmer,
     const arma::mat& nlin_other,
     Rcpp::Function func,
+    Rcpp::Function func_event,
     const arma::vec& mortvec,
     double birth_livestock,
     double birth_farmer,
@@ -29,11 +30,16 @@ arma::vec compute_model(
     const arma::mat& agg_mort,
     const arma::mat& sel_inc,
     double t) {
-  // -- Get force of infection
-  arma::vec lam = lambda*invec;
+
+  // time dependent Functions to num vector
+  Rcpp::NumericVector temperature_r_factor = func(t);
+  Rcpp::NumericVector spline_event_factor = func_event(t);
+  
+  
+    // -- Get force of infection
+  arma::vec lam = spline_event_factor[0]*lambda*invec;
   
   // -- Get all model components together
-  Rcpp::NumericVector temperature_r_factor = func(t);
   arma::mat allmat (linear +  
     lam(0) * nlin_livestock * temperature_r_factor[0] +
     lam(1) * nlin_farmer +

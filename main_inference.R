@@ -32,10 +32,13 @@ library(stringr)
 library(here)
 library (Rcpp)
 library(profvis)
+library(splines)
+library(data.table)
+library(broom)
 ########################################################################################
 # Part 0. select country
 ########################################################################################
-country<-"SA"
+country<-"AFG"
 
 
 ########################################################################################
@@ -45,6 +48,7 @@ source(here("src","setup_data.R"))
 source(here("src","setup_model.R"))
 source(here("src","make_model.R"))
 source(here("src","get_sim_results.R"))
+source(here("src","spline_functions.R"))
 #Rcpp vectorized functions
 source(here("src","get_objective_vectorized.R"))
 source(here("src","goveqs_basis_rcpp.R"))
@@ -56,8 +60,8 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 
 # Set MCMC important parameters 
 
-chain<-"chain2.csv"
-n_iterations<-20000
+chain<-"chain1.csv"
+n_iterations<-10000
 
 
 ###########################################################################################################
@@ -67,7 +71,10 @@ theta <- data.frame(
   A=0.08395688 , # driving temperature dependent force of infection
   F_risk=0.4599926 , # risk for farmers
   O_factor=0.4967469,
-  imm_p= 0.8149969)#
+  imm_p= 0.8149969,
+  knot1=140,
+  knot2=300,
+  beta1=0.4)#
   
 # 2.1. MY PRIOR
 ###########################################################################################################
@@ -140,15 +147,20 @@ init.theta <-c(
   A=0.09997111 , # driving temperature dependent force of infection
   F_risk=0.316317  , # risk for farmers
   O_factor=0.6794519 ,
-  imm_p= 0.6179519)#
+  imm_p= 0.6179519,  
+  knot1=140,
+  knot2=300,
+  beta1=0.4)#
 
 proposal.sd <- init.theta/8
 
 n.iterations <- n_iterations
-print.info.every <- 100
+print.info.every <- 10
 
-limits=list(lower=c(A= 0, F_risk=0, O_factor=0, imm_p=0),
-            upper=c(A= Inf, F_risk=Inf, O_factor=Inf, imm_p=1)) #inf!
+limits=list(
+  lower=c(A= 0,   F_risk=0,   O_factor=0,   imm_p=0, knot1=1, knot2=251 , beta1=0),
+  upper=c(A= Inf, F_risk=Inf, O_factor=Inf, imm_p=1,knot1=250, knot2=400, beta1=1)
+  ) #inf!
 
 adapt.size.start <- 500
 adapt.size.cooling <- 0.999

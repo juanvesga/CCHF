@@ -18,6 +18,7 @@ goveqs_basis <- function (t, state, parameters) {
                         M$nlin$f,
                         M$nlin$o,
                         foi_temp_factor_func,
+                        foi_event_func,
                         M$mortvec,
                         Birth,
                         Birth_F,

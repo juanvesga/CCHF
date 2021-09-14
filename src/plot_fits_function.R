@@ -84,8 +84,15 @@ plot_fits_function<-function(sim,observations){
     
     r_temp<-matrix(NA,params$nt,nrow(theta))
     for (jj in 1:nrow(theta) ){
+      
+      x<-seq(0,1,length.out = params$nt)
+      knots <- as.numeric(c(theta$knot1[jj]/params$nt,theta$knot2[jj]/params$nt ,1000/params$nt ))
+      betas = c(0,theta$beta1[jj], 0.1, 0.1, 0.1, 0.1)
+      sdata <- genSpline(x, knots, 2, betas)
+      
+      
       for (tt in 1:length(soil_t)){
-        r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])
+        r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])*sdata$dt$y.spline[tt]*params$sp_hz
       }
     }
     
