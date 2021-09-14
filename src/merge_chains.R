@@ -1,5 +1,6 @@
 #Merge chains  CCHF May 2021
 
+rm(list = ls()) 
 library(Hmisc)
 library(reshape2)
 library(zoo)
@@ -23,7 +24,8 @@ library(here)
 library(coda)
 
 country<- "SA"
-
+burn<- 0.5 # at what point in trace to chop burn-in runs
+thin_n<- 10 # sample every n runs (reduce autocorrelation) 
 # analyse MCMC samples
 
 
@@ -36,17 +38,14 @@ trace1_2 <- read.csv(here("output",country,"trace_chain2.csv"))
 head(trace1_1)
 mcmc.trace1_1 <- mcmc(trace1_1)
 summary(mcmc.trace1_1)        
-
 acceptanceRate <- 1 - rejectionRate(mcmc.trace1_1)
 acceptanceRate
 effectiveSize(mcmc.trace1_1)
-plot(mcmc.trace1_1)
-mcmc.trace.burned1_1 <- burnAndThin(mcmc.trace1_1, burn = round(nrow(trace1_1)*0.5))
-plot(mcmc.trace.burned1_1)
-autocorr.plot(mcmc.trace.burned1_1)
-mcmc.trace.burned.thinned1_1<- burnAndThin(mcmc.trace.burned1_1, thin = 50) 
-autocorr.plot(mcmc.trace.burned.thinned1_1)
-plot(mcmc.trace.burned.thinned1_1)
+mcmc.trace.burned1_1 <- burnAndThin(mcmc.trace1_1, 
+                                    burn = round(nrow(trace1_1)*burn))
+mcmc.trace.burned.thinned1_1<- 
+  burnAndThin(mcmc.trace.burned1_1, thin = thin_n) 
+
 summary(mcmc.trace.burned.thinned1_1)
 
 #################
@@ -54,17 +53,11 @@ summary(mcmc.trace.burned.thinned1_1)
 head(trace1_2)
 mcmc.trace1_2 <- mcmc(trace1_2)
 summary(mcmc.trace1_2)        
-
 acceptanceRate <- 1 - rejectionRate(mcmc.trace1_2)
 acceptanceRate
 effectiveSize(mcmc.trace1_2)
-plot(mcmc.trace1_2)
-mcmc.trace.burned1_2 <- burnAndThin(mcmc.trace1_2, burn = round(nrow(trace1_2)*0.25))
-plot(mcmc.trace.burned1_2)
-autocorr.plot(mcmc.trace.burned1_2)
-mcmc.trace.burned.thinned1_2<- burnAndThin(mcmc.trace.burned1_2, thin = 20) 
-autocorr.plot(mcmc.trace.burned.thinned1_2)
-plot(mcmc.trace.burned.thinned1_2)
+mcmc.trace.burned1_2 <- burnAndThin(mcmc.trace1_2, burn = round(nrow(trace1_2)*burn))
+mcmc.trace.burned.thinned1_2<- burnAndThin(mcmc.trace.burned1_2, thin = thin_n) 
 summary(mcmc.trace.burned.thinned1_2)
 
 #################
@@ -78,7 +71,16 @@ trace_both <- mcmc(df_both)
 autocorr.plot(df_both)
 plot(trace_both)
 
-write.table(df1_1, here("output",country,"posteriors.txt"), sep = "\t" )
+write.table(df1_2, here("output",country,"posteriors.txt"), sep = "\t" )
 #####################################################################################
+plot(mcmc.trace1_1)
+plot(mcmc.trace.burned1_1)
+autocorr.plot(mcmc.trace.burned1_1)
+autocorr.plot(mcmc.trace.burned.thinned1_1)
+plot(mcmc.trace.burned.thinned1_1)
 
-
+plot(mcmc.trace1_2)
+plot(mcmc.trace.burned1_2)
+autocorr.plot(mcmc.trace.burned1_2)
+autocorr.plot(mcmc.trace.burned.thinned1_2)
+plot(mcmc.trace.burned.thinned1_2)

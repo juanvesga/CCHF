@@ -22,6 +22,9 @@ arma::vec compute_model(
     arma::uvec sus_other_indx, 
     arma::uvec aux_inc_indx,
     arma::uvec aux_mort_indx,
+    arma::uvec livest_indx,
+    arma::uvec livest_prev_indx,
+    arma::uvec livest_pass_imm_indx,
     const arma::mat& agg_inc,
     const arma::mat& agg_mort,
     const arma::mat& sel_inc,
@@ -44,8 +47,11 @@ arma::vec compute_model(
   dx = dx - morts;
   
   //  Implement births
+  double liv_prev= sum(invec(livest_prev_indx))/sum(invec(livest_indx));
   
-  dx(sus_a1_liv_indx) = dx(sus_a1_liv_indx)+birth_livestock ;
+  dx(sus_a1_liv_indx) = dx(sus_a1_liv_indx)+birth_livestock*(1-liv_prev) ;
+  dx(livest_pass_imm_indx) = dx(livest_pass_imm_indx)+birth_livestock*liv_prev ;
+  
   dx(sus_farmer_indx) = dx(sus_farmer_indx)+birth_farmer ;
   dx(sus_other_indx)  = dx(sus_other_indx)+birth_other ;
   

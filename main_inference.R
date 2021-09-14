@@ -56,18 +56,19 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 
 # Set MCMC important parameters 
 
-chain<-"chain1.csv"
-n_iterations<-5000
+chain<-"chain2.csv"
+n_iterations<-20000
 
 
 ###########################################################################################################
 # PART 2. INFERENCE: Model: prior, posterior and inference
 ###########################################################################################################
 theta <- data.frame(
-  A=0.08, # driving temperature dependent force of infection
-  F_risk=0.8 , # risk for farmers
-  O_factor=0.4)#
-
+  A=0.08395688 , # driving temperature dependent force of infection
+  F_risk=0.4599926 , # risk for farmers
+  O_factor=0.4967469,
+  imm_p= 0.8149969)#
+  
 # 2.1. MY PRIOR
 ###########################################################################################################
 my_prior <- function(theta) {
@@ -111,9 +112,14 @@ my_posterior <- function(theta) {
   loglik_prev_other <- dbinom(x=observations$prev_other_Posa, size=observations$prev_other_denoma,
                               prob=sim$h_prev_other, log=TRUE)
   
-  log.likelihood <- loglik_human_reported + loglik_liv_prev_age + loglik_liv_prev_all + loglik_prev_farmer +  loglik_prev_other
-  og.likelihood <-  loglik_liv_prev_age + loglik_liv_prev_all + loglik_prev_farmer +  loglik_prev_other
   
+  if (country=="AFG"){
+  
+  log.likelihood <- loglik_human_reported + loglik_liv_prev_age + loglik_liv_prev_all + loglik_prev_farmer +  loglik_prev_other
+}else{
+  
+  log.likelihood <-  loglik_liv_prev_age + loglik_liv_prev_all + loglik_prev_farmer +  loglik_prev_other
+  }
   log.prior <- my_prior(theta)
   
   log.posterior <- log.prior + log.likelihood 
@@ -123,26 +129,30 @@ my_posterior <- function(theta) {
 }
 
 
- # profvis({   
- # 
-  my_posterior(theta)
- # })
+ #  profvis({   
+ # # 
+   my_posterior(theta)
+ #  })
 ###########################################################################################################
 #  PART 3. Inference MCMC-MH
 ###########################################################################################################
-init.theta <- c(A=0.085,  F_risk=0.70, O_factor=0.35)
+init.theta <-c(
+  A=0.09997111 , # driving temperature dependent force of infection
+  F_risk=0.316317  , # risk for farmers
+  O_factor=0.6794519 ,
+  imm_p= 0.6179519)#
 
-proposal.sd <- init.theta/10
+proposal.sd <- init.theta/8
 
 n.iterations <- n_iterations
-print.info.every <- n.iterations/100
+print.info.every <- 100
 
-limits=list(lower=c(A= 0, F_risk=0, O_factor=0),
-            upper=c(A= Inf, F_risk=Inf, O_factor=Inf)) #inf!
+limits=list(lower=c(A= 0, F_risk=0, O_factor=0, imm_p=0),
+            upper=c(A= Inf, F_risk=Inf, O_factor=Inf, imm_p=1)) #inf!
 
-adapt.size.start <- 100
+adapt.size.start <- 500
 adapt.size.cooling <- 0.999
-adapt.shape.start <- 300
+adapt.shape.start <- 2000
 acceptance.rate.weight <- NULL 
 acceptance.window <- NULL
 #max.scaling.sd <- 5

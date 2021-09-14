@@ -1,8 +1,9 @@
 get_sim_results<- function(theta){
   
   nruns<- nrow(theta)
+  dates<-seq( temp_start_date+1, by=1, len=params$nt-1)
   day_length<-params$nt
-  week_length<-params$nt/7
+  week_length<-length(unique(ISOweek(dates)))
   
   # Allocate memory
   h_inc_week <- matrix(NA, nrow=nruns, ncol=week_length)
@@ -15,17 +16,17 @@ get_sim_results<- function(theta){
   h_prev_other_long  <- matrix(NA, nrow=nruns, ncol=day_length)
   
   
-  
   for (jj in 1:nruns){
     
     
     # Pass calibrated parameters 
     params$theta <- c(A=theta$A[jj], 
                       F_risk=theta$F_risk[jj], 
-                      O_factor=theta$O_factor[jj])
+                      O_factor=theta$O_factor[jj],
+                      imm_p=theta$imm_p[jj])
     # Risk of transmission in other occupations
     params$risk_O <-params$theta[["O_factor"]]*params$theta[["F_risk"]]
-    
+    params$imm_t0<-params$imm_t0_bulgaria*params$theta[["imm_p"]]
     # 1. Call model function 
     #########################################################################################################  
     
@@ -37,30 +38,30 @@ get_sim_results<- function(theta){
     
     
     #Reported cases in humans
-    tmp<-data.frame(date = seq( temp_start_date, by=1, len=params$nt-1),
-                    time = c(1:(params$nt-1)),group = rep("sim",params$nt-1),
-                    cases_tmp=round(diff(out$daily_F_incidence+out$daily_O_incidence)* params$RR,digits = 4),
-                    week=rep(seq(params$nt), each=7, length.out=params$nt-1))
+    dates<-seq( temp_start_date+1, by=1, len=params$nt-1)
+    tmp<-data.frame(date = dates ,
+                    cases_tmp=diff(out$daily_F_incidence+out$daily_O_incidence),
+                    week=ISOweek(dates))
     tmp$cases<- ifelse(tmp$cases_tmp==0, 1e-6, as.numeric(paste(tmp$cases_tmp)))
     tmp$cases_tmp<-NULL
     
     human_inc_weekly<-tmp%>%
-      group_by(group,week)%>%
-      summarise(reported=sum(cases),.groups = 'drop')%>%
-      mutate(reported=ifelse(reported==0,NA,as.numeric(paste(reported))))
+      group_by(week)%>%
+      summarise(reported=sum(cases))%>%
+      mutate(cases=ifelse(reported==0,NA,as.numeric(paste(reported))))
     
-    h_inc_week[jj,]<-human_inc_weekly$reported 
+    h_inc_week[jj,]<-human_inc_weekly$cases * params$RR 
     
     
     # Livestock prevalence by age 
-    L_1<-out$L_S1+out$L_I1+out$L_R1
+    L_1<-out$L_S1+out$L_I1+out$L_R1+out$L_Ri
     L_2<-out$L_S2+out$L_I2+out$L_R2
     L_3<-out$L_S3+out$L_I3+out$L_R3
     L_4<-out$L_S4+out$L_I4+out$L_R4
     L_5<-out$L_S5+out$L_I5+out$L_R5
     
     simu_age_R<-c(
-      mean(out$L_R1[(field_work_start:field_work_end)]),
+      mean(out$L_R1[(field_work_start:field_work_end)]+out$L_Ri[(field_work_start:field_work_end)]),
       mean(out$L_R2[(field_work_start:field_work_end)]),
       mean(out$L_R3[(field_work_start:field_work_end)]),
       mean(out$L_R4[(field_work_start:field_work_end)]),
@@ -75,7 +76,7 @@ get_sim_results<- function(theta){
     
     l_prev_age[jj,] <- simu_age_R / simu_age_N
     
-    simu_all_R<-c(out$L_R1+out$L_R2+out$L_R3+out$L_R4+out$L_R5)
+    simu_all_R<-c(out$L_Ri+out$L_R1+out$L_R2+out$L_R3+out$L_R4+out$L_R5)
     simu_all_N<-c(L_1+L_2+L_3+L_4+L_5)
     l_prev_all_long[jj,]<-simu_all_R/simu_all_N
     simu_all_R<-mean(simu_all_R[(field_work_start:field_work_end)])
@@ -113,7 +114,7 @@ get_sim_results<- function(theta){
     l_prev_all_long = l_prev_all_long,
     h_prev_farmer_long = h_prev_farmer_long,
     h_prev_other_long  = h_prev_other_long
-    
+    # 
   )
   
   

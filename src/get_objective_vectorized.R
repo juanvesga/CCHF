@@ -2,8 +2,14 @@ get_objective<-function(params,methd_intgr="euler"){
   
   # Initial conditions
   ###########################################################################################################
+  init_prev<-sum(params$imm_t0*params$pop_st*params$N_liv)/params$N_liv
+  prev_vec<-rep(0,5) 
+  prev_vec[1]<-init_prev
+  
   states_ini <- c(
-    L_S = (1-params$imm_t0)*params$pop_st*params$N_liv - params$pop_st,
+    L_Ri= prev_vec[1]*(1-params$imm_t0[1])*params$pop_st[1]*params$N_liv , 
+    L_S = (1-prev_vec)*(1-params$imm_t0)*params$pop_st*params$N_liv - 
+      params$pop_st,
     L_I = params$pop_st,
     L_R = params$imm_t0*params$pop_st*params$N_liv,
     
@@ -36,10 +42,12 @@ get_objective<-function(params,methd_intgr="euler"){
   modulo_vec<- which((seq(1:params$nt)%%(365))==0)
   seed_vec  <- modulo_vec+1
   
-  seed_event<-data.frame(var =rep( c("L_I1","L_I2","L_I3","L_I4","L_I5"),length(seed_vec)),
+  seed_event<-data.frame(var =rep( c("L_I1","L_I2","L_I3","L_I4","L_I5"),
+                                   length(seed_vec)),
                          time = rep(seed_vec,each=5) ,
                          value = rep(params$pop_st,length(seed_vec)),
-                         method = rep(c("add", "add", "add", "add","add"),length(seed_vec)))
+                         method = rep(c("add", "add", "add", "add","add"),
+                                      length(seed_vec)))
   
   
   # Calculating R value for livestock temperature dependent
