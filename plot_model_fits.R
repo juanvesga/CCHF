@@ -24,7 +24,7 @@ library(here)
 library (Rcpp)
 library(matrixStats)
 
-country<- "SA"
+country<- "AFG"
 
 
 ########################################################################################
@@ -50,7 +50,7 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 # Load posterior samples
 posteriors <- read.table(here("output",country,"posteriors.txt"), sep = "\t" )
 theta<-posteriors%>%
-  select(A,F_risk, O_factor,imm_p)
+  select(A,F_risk, O_factor,imm_p,RRreport)
 
 
 ## Run model 
@@ -62,11 +62,11 @@ saveRDS(sim, file=here("output",country,"simulations.rds"))
 # ... or load previously saved sim results
 sim<-readRDS(here("output",country,"simulations.rds"))
 
-  pdf(here("output",country,"model_fits.pdf")) 
+pdf(here("output",country,"model_fits_increased_dx.pdf")) 
 
 plot_fits_function(sim,observations)
 
-   dev.off() 
+dev.off() 
 
 
 

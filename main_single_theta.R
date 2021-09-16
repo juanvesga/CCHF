@@ -60,31 +60,35 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 ###########################################################################################################
 if (test_mode==1){
   theta <- data.frame(
-    A=0.076, # driving temperature dependent force of infection
-    F_risk=0.54 , # risk for farmers
-    O_factor=0.45,
-    imm_p=0.6)
+    A=0.08, # driving temperature dependent force of infection
+    F_risk=4.92 , # risk for farmers
+    O_factor=0.99,
+    imm_p=0.6,
+    RRreport=0.74)
 }else{
 
 # Load posterior samples
 posteriors <- read.table(here("output",country,"posteriors.txt"), sep = "\t" )
 
 theta_in<-posteriors%>%
-  select(A,F_risk, O_factor, imm_p)
+  select(A,F_risk, O_factor, imm_p,RRreport)
 
 theta <- data.frame(
   A= median(theta_in$A)	, # driving temperature dependent force of infection
   F_risk=median(theta_in$F_risk)	, # risk for farmers
   O_factor=median(theta_in$O_factor),
-  imm_p=median(theta_in$imm_p))#
-
-
+  imm_p=median(theta_in$imm_p),
+  RRreport=median(theta_in$RRreport)
+  )#
 }
 
 
-
+# profvis({  
 
 sim<-get_sim_results(theta)
+ 
+# })
+
 
  # pdf(here("output",country,"model_proj_3motickcycle.pdf")) 
 

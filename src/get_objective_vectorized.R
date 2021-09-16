@@ -32,14 +32,14 @@ get_objective<-function(params,methd_intgr="euler"){
   )
   
   # Create model transition matrices
-
+  
   M0 <- make_model(params)
   params$M<-M0
   
   # Seeding infectious livestock each year (transovarial transmission)
   ###########################################################################################################
   #Define vector for seeding transovarial event (every 365 days) 
-  modulo_vec<- which((seq(1:params$nt)%%(365))==0)
+  modulo_vec<- which((seq(1:params$nt)%%(12))==0)
   seed_vec  <- modulo_vec+1
   
   seed_event<-data.frame(var =rep( c("L_I1","L_I2","L_I3","L_I4","L_I5"),
@@ -70,9 +70,16 @@ get_objective<-function(params,methd_intgr="euler"){
   fx<- goveqs_basis
   times_new<- seq(1,params$nt)
   
-  out <- as.data.frame(ode(y = states_ini, times = times_new, 
-                           func = fx, parms = params,method=methd_intgr,
-                            events = list(data = seed_event)))
-  
+  if (methd_intgr=="lsoda"){
+    
+    out <- as.data.frame(lsoda(y = states_ini, times = times_new, 
+                             func = fx, parms = params,
+                             events = list(data = seed_event)))
+  } else{
+    
+    out <- as.data.frame(ode(y = states_ini, times = times_new, 
+                             func = fx, parms = params,method=methd_intgr,
+                             events = list(data = seed_event)))
+  }
   return(out)
 }

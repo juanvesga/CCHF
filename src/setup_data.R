@@ -12,6 +12,8 @@
 if(country=="AFG"){
   temp_start_date <-as.Date("2008-04-01")
   end_date<- as.Date("2008-10-31")
+  temp_start_mo <-strftime(temp_start_date, format = "%Y-%m")
+  end_mo<- strftime(end_date, format = "%Y-%m")
   fwork_start<-as.Date("2009-08-30")
   fwork_end <-as.Date("2009-08-15")
   fwork_mid <-as.Date("2009-08-31")
@@ -21,6 +23,43 @@ if(country=="AFG"){
   fwork_midy <-as.Date("2009-02-28")
   format_date<-"%d/%m/%Y"
   
+  years_fit<-seq(2009,2016,1)
+  
+  # Get weekly data to montly 
+  human_inc1 <- read.csv(here("data",country,"cchf_human_weekly2008.csv"), header=TRUE)#, sep=,)
+  human_inc1$date<- as.Date(human_inc1$date, format="%d/%m/%Y")
+  human_inc1$month<-strftime(human_inc1$date, format = "%Y-%m")
+  human_inc1<-human_inc1%>%
+    group_by(month)%>%
+    summarise(cases=sum(obs))
+  human_inc1<-human_inc1[human_inc1$month>=temp_start_mo,]
+  human_inc1$time<-seq(1,NROW(human_inc1$cases),1)
+  
+  #Get monthly data
+  human_inc2 <- read.csv(here("data",country,"cchf_human_monthly2017_2018.csv"), header=TRUE)
+  human_inc2$date<- as.Date(human_inc2$date, format="%d/%m/%Y")
+  human_inc2$month<-strftime(human_inc2$date, format = "%Y-%m")
+  human_inc2$time<-1+(interval(temp_start_date,human_inc2$date) %/% months(1)) 
+  
+  human_inc2 <- human_inc2%>%
+    rename(cases=obs)%>%
+    select(month,cases,time)
+  # Final monthly cases data
+  human_month<-rbind(human_inc1,human_inc2)
+  human_month<-human_month%>%
+    mutate(cases=ifelse(cases==0,NA,as.numeric(paste(cases))))
+  
+  # Get Yearly data 
+  human_inc3 <- read.csv(here("data",country,"cchf_human_yearly2009_2016.csv"), header=TRUE)
+  human_inc3$date<- as.Date(human_inc3$date, format="%d/%m/%Y")
+  human_inc3$year<-strftime(human_inc3$date, format = "%Y")
+  human_year<-human_inc3%>%
+    rename(cases=obs)
+  
+  human_year<-human_year%>%
+    mutate(cases=ifelse(cases==0,NA,as.numeric(paste(cases))))
+  
+
 }else if(country=="SA"){ 
   temp_start_date <-as.Date("2016-01-01")
   end_date<- as.Date("2017-12-31")
@@ -35,26 +74,16 @@ if(country=="AFG"){
   
 }
 
-
-human_inc2 <- read.csv(here("data",country,"cchf_human05_14.csv"))#, sep=,)
-head(human_inc2, 15)
-
-human_inc2$time <- c(1:nrow(human_inc2))
-human_inc2$dates <- as.Date(human_inc2$date, format="%d/%m/%Y")
-# human_inc2$week <- strftime(human_inc2$dates, format = "%Y-W%V")
-human_inc2$week <- ISOweek(human_inc2$dates)
-head(human_inc2)
-human_inc <- human_inc2[human_inc2$dates>=temp_start_date,]
-human_inc$time <- c(1:nrow(human_inc))
+year_vec<-seq(2008,2019,by=1)
 
 # define the dates of the field work August 2009
-field_work_start<- human_inc[human_inc$dates==fwork_start,"time"] 
-field_work_end <- human_inc[human_inc$dates==fwork_end,"time"] 
-field_work_mid <- human_inc[human_inc$dates==fwork_mid,"time"] 
+field_work_start<-(interval(temp_start_date,fwork_start) %/% months(1)) 
+field_work_end <- (interval(temp_start_date,fwork_end) %/% months(1))  
+field_work_mid <- (interval(temp_start_date,fwork_mid) %/% months(1)) 
 
-year_work_start<- human_inc[human_inc$dates==fwork_starty,"time"] 
-year_work_end<- human_inc[human_inc$dates==fwork_endy,"time"] 
-year_work_mid<- human_inc[human_inc$dates==fwork_midy,"time"] 
+# year_work_start<- human_inc[human_inc$dates==fwork_starty,"time"] 
+# year_work_end<- human_inc[human_inc$dates==fwork_endy,"time"] 
+# year_work_mid<- human_inc[human_inc$dates==fwork_midy,"time"] 
 
 # 2. Import human prevalence by occupation farming and other occupations (from CCHF 2009 dataset)
 #########################################################################################################################
@@ -80,48 +109,43 @@ prev_liv_all$up_ci <- round(binconf(prev_liv_all$pos_igg, prev_liv_all$denom)[,3
 #########################################################################################################################
 # csv file for Ingil district, Afghanistan - Median- Source ERA5 corpernicus soil temperature level 1 (0-7cm)
 
+temp_day<- read.csv(here("data",country,'soil_temp_extended.csv'), header=TRUE, sep=',')
+temp_day$date <- as.Date(temp_day$vector_days,  format=format_date)
+temp_day <- temp_day[temp_day$date >= temp_start_date,]
+temp_day$month <- strftime(temp_day$date, format = "%Y-%m")
 
-temp_day2<- read.csv(here("data",country,'soil_temp.csv'), header=TRUE, sep=',')
-temp_day2$date <- as.Date(temp_day2$vector_days,  format=format_date)
-temp_day <- temp_day2[temp_day2$date >= temp_start_date,]
-temp_day$time <- c(1:nrow(temp_day))
+temp_month<-temp_day%>%
+  group_by(month)%>%
+  summarise(soil_t=mean(Temperature))
+temp_month$time <- c(1:nrow(temp_month))
 
-head(temp_day)
+soil_t<- temp_month$soil_t
 
-# transmission seasons starts (when outbreaks start April 1st) and ends on 31/10
-Transm_Start <- temp_day[temp_day$date==temp_start_date, "time"]
-Transm_End <- temp_day[temp_day$date==end_date, "time"] # 2004-10-31
-
-# Date of spring start 2008 (1st April 2008)
-spring_2008_start_date <- temp_day[temp_day$date==temp_start_date, "time"] # 1097
-Spring08 <- spring_2008_start_date
-
-soil_t<- temp_day$Temperature
+# # transmission seasons starts (when outbreaks start April 1st) and ends on 31/10
+# Transm_Start <- temp_day[temp_day$date==temp_start_date, "time"]
+# Transm_End <- temp_day[temp_day$date==end_date, "time"] # 2004-10-31
+# 
+# # Date of spring start 2008 (1st April 2008)
+# spring_2008_start_date <- temp_day[temp_day$date==temp_start_date, "time"] # 1097
+# Spring08 <- spring_2008_start_date
 
 
-# Data object for calibartion and plotting
-dat<-seq( temp_start_date, by=1, len=length(human_inc$obs))
-tmp<-data.frame(date = dat,
-                   time = c(1:(length(human_inc$obs))),
-                   cases=human_inc$obs,
-                   week=ISOweek(dat))
 
-tmp2<-tmp%>%
-  group_by(week)%>%
-  summarise(reported=sum(cases),.groups = 'drop')%>%
-  mutate(reported=ifelse(reported==0,NA,as.numeric(paste(reported))))
+# Index for monthly human cases
+tmp<-which(!is.na(human_month$cases))
 
-ind_h<-which(!is.na(tmp2$reported))
 
 
 
 observations<-list(
   
   start_date=temp_start_date,
-  h_inc_week.x = ind_h,
-  h_inc_week.yw = tmp2$week[ind_h],
-  h_inc_week = tmp2$reported[ind_h],
+  start_month=temp_start_mo,
+  index_mo_cases=human_month$time[tmp],
+  cases_human_mo = human_month$cases[tmp],
   
+  index_yr_cases=which(year_vec%in%years_fit),
+  cases_human_yr = human_year$cases,
   
   prev_liv_age_pos_IgG=prev_liv$pos_igg,
   prev_liv_age_denom=prev_liv$denom,
@@ -167,6 +191,6 @@ observations<-list(
 # }
 # 
 temp_foi_func<-function(celsius,temp_foi_factor,min_limit=min(soil_t)){
-    x<-(temp_foi_factor*(min(celsius,30) - min_limit))
+  x<-(temp_foi_factor*(min(celsius,30) - min_limit))
   return(x)
 }

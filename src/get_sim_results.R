@@ -1,19 +1,19 @@
 get_sim_results<- function(theta){
   
   nruns<- nrow(theta)
-  dates<-seq( temp_start_date+1, by=1, len=params$nt-1)
-  day_length<-params$nt
-  week_length<-length(unique(ISOweek(dates)))
+  mo_length<-params$nt
+  yr_length<-length(unique(as.Date(temp_month$month,format="%Y")))
   
   # Allocate memory
-  h_inc_week <- matrix(NA, nrow=nruns, ncol=week_length)
+  h_inc_month <- matrix(NA, nrow=nruns, ncol=mo_length-1)
+  h_inc_year <- matrix(NA, nrow=nruns, ncol=yr_length)
   l_prev_age <- matrix(NA, nrow=nruns, ncol=5)
   l_prev_all <- matrix(NA, nrow=nruns, ncol=1)
   h_prev_farmer <- matrix(NA, nrow=nruns, ncol=1)
   h_prev_other  <- matrix(NA, nrow=nruns, ncol=1)
-  l_prev_all_long <- matrix(NA, nrow=nruns, ncol=day_length)
-  h_prev_farmer_long <- matrix(NA, nrow=nruns, ncol=day_length)
-  h_prev_other_long  <- matrix(NA, nrow=nruns, ncol=day_length)
+  l_prev_all_long <- matrix(NA, nrow=nruns, ncol=mo_length)
+  h_prev_farmer_long <- matrix(NA, nrow=nruns, ncol=mo_length)
+  h_prev_other_long  <- matrix(NA, nrow=nruns, ncol=mo_length)
   
   
   for (jj in 1:nruns){
@@ -23,35 +23,63 @@ get_sim_results<- function(theta){
     params$theta <- c(A=theta$A[jj], 
                       F_risk=theta$F_risk[jj], 
                       O_factor=theta$O_factor[jj],
-                      imm_p=theta$imm_p[jj])
+                      imm_p=theta$imm_p[jj],
+                      RRreport=theta$RRreport[jj])
     # Risk of transmission in other occupations
     params$risk_O <-params$theta[["O_factor"]]*params$theta[["F_risk"]]
     params$imm_t0<-params$imm_t0_bulgaria*params$theta[["imm_p"]]
     # 1. Call model function 
     #########################################################################################################  
     
-    out<-get_objective(params,"euler")
+    out<-get_objective(params,"lsoda")
     
     
     # 2. Process and format model output 
     #########################################################################################################  
     
     
-    #Reported cases in humans
-    dates<-seq( temp_start_date+1, by=1, len=params$nt-1)
+    # #Reported cases in humans
+    
+    # Reporting vvector 
+    # RRyear<- c(rep(params$RR,2013-2008),seq(params$RR, params$theta[["RRreport"]],
+    #   length.out=yr_length-(2013-2008)))
+    # 
+    
+    
+    
+    RRyear<-logistic(seq(1,yr_length),d=yr_length*0.72, 
+                  a=2,
+                  c=params$RR/params$theta[["RRreport"]], z=1)*params$theta[["RRreport"]]
+    
+    # plot(seq(1,yr_length),RRyear)
+    
+    # RRmonth<- c(rep(params$RR,(2013-2008)*12),seq(params$RR, params$theta[["RRreport"]],
+    #                                     length.out=(mo_length-(2013-2008)*12)-1))
+  
+    RRmonth<-logistic(seq(1,mo_length-1),d=(mo_length-1)*0.72, 
+                     a=0.2*(mo_length-1)/100,
+                     c=params$RR/params$theta[["RRreport"]], z=1)*params$theta[["RRreport"]]
+    
+   # plot(seq(1,mo_length-1),RRmonth)
+    
+    
+    
+      # RRmonth<- seq(params$RR, params$theta[["RRreport"]], length.out=mo_length-1)
+    # RRyear<- seq(params$RR, params$theta[["RRreport"]], length.out=yr_length)
+    dates<-temp_month$month[2:params$nt]
     tmp<-data.frame(date = dates ,
-                    cases_tmp=diff(out$daily_F_incidence+out$daily_O_incidence),
-                    week=ISOweek(dates))
+                     cases_tmp=diff(out$daily_F_incidence+out$daily_O_incidence))
     tmp$cases<- ifelse(tmp$cases_tmp==0, 1e-6, as.numeric(paste(tmp$cases_tmp)))
     tmp$cases_tmp<-NULL
+    # 
+    human_inc_yr<-tmp%>%
+       mutate(year=as.Date(date,format="%Y"))%>%
+       group_by(year)%>%
+       summarise(reported=sum(cases))%>%
+       mutate(cases=ifelse(reported==0,NA,as.numeric(paste(reported))))
     
-    human_inc_weekly<-tmp%>%
-      group_by(week)%>%
-      summarise(reported=sum(cases))%>%
-      mutate(cases=ifelse(reported==0,NA,as.numeric(paste(reported))))
-    
-    h_inc_week[jj,]<-human_inc_weekly$cases * params$RR 
-    
+    h_inc_month[jj,]<- tmp$cases* RRmonth
+    h_inc_year[jj,]<-  human_inc_yr$cases * RRyear
     
     # Livestock prevalence by age 
     L_1<-out$L_S1+out$L_I1+out$L_R1+out$L_Ri
@@ -106,7 +134,8 @@ get_sim_results<- function(theta){
   
   sim<-list(
     
-    h_inc_week=h_inc_week,
+    h_inc_month=h_inc_month,
+    h_inc_year=h_inc_year,
     l_prev_age = l_prev_age,
     l_prev_all = l_prev_all,
     h_prev_farmer = h_prev_farmer,

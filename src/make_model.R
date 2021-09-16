@@ -8,13 +8,13 @@ make_model<-function(p){
   m <- matrix(0,i$nstates,i$nstates)
   
   
-  # Lost of passive immunity (~ to average lactation period)
+  # Loss of passive immunity (~ to average lactation period)
   source <- s$L_Ri; destin <- intersect(s$L_S,s$a1); rate <- p$time_passimm_loss_livestock
   m[ cbind(destin, source) ] <- m[ cbind(destin, source) ]+rate
   
-  # Lost of acquired immunity 
-  source <- s$L_R; destin <- s$L_S; rate <- p$time_susceptible_livestock
-  m[ cbind(destin, source) ] <- m[ cbind(destin, source) ]+rate
+  # Loss of acquired immunity 
+  # source <- s$L_R; destin <- s$L_S; rate <- p$time_susceptible_livestock
+  # m[ cbind(destin, source) ] <- m[ cbind(destin, source) ]+rate
   
 
   # Livestock immunity after infection

@@ -2,7 +2,7 @@ plot_fits_function<-function(sim,observations){
   
   windows()
   
-  if (nrow(sim$h_inc_week)>1)
+  if (nrow(sim$h_inc_month)>1)
     # #################################################################
   # PLot mutiple runs (uncertanty and median)
   # #################################################################
@@ -38,14 +38,14 @@ plot_fits_function<-function(sim,observations){
     
     
     # Human cases 
-    date<-seq( observations$start_date, by=1, len=ncol(sim$h_prev_farmer_long))
-    wk<-seq(1,length(unique(ISOweek(date))))
-    df_s <-as.data.frame(rowQuantiles(t((sim$h_inc_week)),
+    mo<-seq( 2, by=1, len=ncol(sim$h_prev_farmer_long)-1)
+    df_s <-as.data.frame(rowQuantiles(t((sim$h_inc_mo)),
                                       probs=c(0.025,0.5,0.975)))
-    df_s$x<-wk#seq(1:(params$nt/7))
-    df_d<-data.frame(x=observations$h_inc_week.x,cases=observations$h_inc_week)
-    df_sim<-data.frame(x=wk, t(sim$h_inc_week))
-    dat_sim<-melt(df_sim, id="x")
+    df_s$x<-mo
+    df_d<-data.frame(x=observations$index_mo_cases,cases=observations$cases_human_mo)
+    
+    df_sim<-data.frame(x=mo, t(sim$h_inc_mo))
+    dat_sim<-reshape2::melt(df_sim, id="x")
     
     p2<- ggplot(data=df_s, aes(x=x))+
       geom_line(data=dat_sim, aes(x=x, y=value, group=variable), col="grey", 
@@ -54,9 +54,25 @@ plot_fits_function<-function(sim,observations){
       geom_line(aes(y=`50%`), col="darkgreen", lwd=0.4) +
       geom_point(data =df_d, aes(x=x, y=cases) ) + theme_bw()+
       # geom_vline(xintercept=which.max(df_s$`50%`), color="red") +
-      xlab("week")+ylab("Weekly cases Reported in humans")
+      xlab("Month")+ylab("Monthly cases Reported in humans")
     
+    # Human cases yearly 
+    yr<-seq( 1, by=1, len=length(unique(as.Date(temp_month$month,format="%Y"))))+2007
+    df_s <-as.data.frame(rowQuantiles(t((sim$h_inc_year)),
+                                      probs=c(0.025,0.5,0.975)))
+    df_s$x<-yr
+    df_d<-data.frame(x=observations$index_yr_cases+2007,cases=observations$cases_human_yr)
+    df_sim<-data.frame(x=yr, t(sim$h_inc_year))
+    dat_sim<-reshape2::melt(df_sim, id="x")
     
+    p3<- ggplot(data=df_s, aes(x=x))+
+      geom_line(data=dat_sim, aes(x=x, y=value, group=variable), col="grey", 
+                alpha=0.2, lwd=0.4) +
+      geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="darkgreen", alpha=0.2)+
+      geom_line(aes(y=`50%`), col="darkgreen", lwd=0.4) +
+      geom_point(data =df_d, aes(x=x, y=cases) ) + theme_bw()+
+      xlab("Year")+ylab("Cases Reported in humans")+
+      xlim(2008, 2018)
     
     ## Prevalence
     
@@ -66,7 +82,7 @@ plot_fits_function<-function(sim,observations){
     df_so$x<- seq(1:params$nt)
     
     
-    p3<- ggplot(data=df_sf,aes(x=x))+
+    p4<- ggplot(data=df_sf,aes(x=x))+
       geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="darkgreen", alpha=0.2)+
       geom_line(aes(y=`50%`), col="darkgreen", lwd=0.4) +
       geom_ribbon(data=df_so,aes(ymin=`2.5%`,ymax=`97.5%`), fill="blue", alpha=0.2)+
@@ -77,7 +93,7 @@ plot_fits_function<-function(sim,observations){
       geom_point(aes(x=field_work_mid,y=prev_other$prev))+
       geom_errorbar(aes(x=field_work_mid,ymin=prev_other$low_ci, ymax=prev_other$up_ci), width=.2,
                     position=position_dodge(.9))+ theme_bw()+
-      ylab("IgG seroprevalence (humans)") + xlab("day")
+      ylab("IgG seroprevalence (humans)") + xlab("Month")
     
     # R_t dependent on temp
     
@@ -96,10 +112,10 @@ plot_fits_function<-function(sim,observations){
     
     
     
-    p4<-    ggplot(data=Rt,aes(x=x))+ 
+    p5<-    ggplot(data=Rt,aes(x=x))+ 
       geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="blue", alpha=0.2)+
       geom_line(aes(y=`50%`), col="blue")+
-      ylab("R_t") + xlab("day")
+      ylab("R_t") + xlab("Month")
     
     # ggplot(data=Rt,aes(x=soil))+ 
     #   geom_point(aes(y=`50%`), col="red")+
@@ -107,7 +123,7 @@ plot_fits_function<-function(sim,observations){
     
     
     
-    gridExtra::grid.arrange(p1,p2,p3,p4)
+    gridExtra::grid.arrange(p1,p2,p3,p4,p5)
     
   }
   # #################################################################
@@ -138,17 +154,29 @@ plot_fits_function<-function(sim,observations){
     
     
     # Human cases 
-    date<-seq( observations$start_date, by=1, len=length(sim$h_prev_farmer_long))
-    wk<-seq(1,length(unique(ISOweek(date))))
-    df_s<-data.frame(x=wk,cases=as.numeric(sim$h_inc_week))
-    df_d<-data.frame(x=observations$h_inc_week.x,cases=observations$h_inc_week)
+    mo<-seq( 2, by=1, len=length(sim$h_prev_farmer_long)-1)
+    df_s<-data.frame(x=mo,cases=as.numeric(sim$h_inc_mo))
+    df_d<-data.frame(x=observations$index_mo_cases,cases=observations$cases_human_mo)
     
     
     p2<- ggplot(data=df_s, aes(x=x))+
       geom_line(aes(y=cases), col="darkgreen", lwd=0.4) +
       geom_point(data =df_d, aes(x=x, y=cases) ) + theme_bw()+
       geom_vline(xintercept=which.max(df_s$cases), color="red") +
-      ylab("Reported cases in humans")+xlab("week")
+      ylab("Reported cases in humans")+xlab("Month")
+    
+    
+    # Human cases yearly 
+    yr<-seq( 1, by=1, len=length(unique(as.Date(temp_month$month,format="%Y"))))+2007
+    df_s<-data.frame(x=yr,cases=as.numeric(sim$h_inc_year))
+    df_d<-data.frame(x=observations$index_yr_cases+2007,cases=observations$cases_human_yr)
+    
+    
+    p3<- ggplot(data=df_s, aes(x=x))+
+      geom_line(aes(y=cases), col="darkgreen", lwd=0.4) +
+      geom_point(data =df_d, aes(x=x, y=cases) ) + theme_bw()+
+      ylab("Reported cases in humans")+xlab("Year")+
+      xlim(2008, 2018)
     
     
     ## Prevalence farmers and others
@@ -156,16 +184,19 @@ plot_fits_function<-function(sim,observations){
     df_sf<- data.frame(x=seq(1:params$nt), prev=as.numeric(sim$h_prev_farmer_long))
     df_so<- data.frame(x=seq(1:params$nt), prev=as.numeric(sim$h_prev_other_long))
     
-    p3<- ggplot(data=df_sf,aes(x=x))+
-      geom_line(aes(y=prev), col="darkgreen", lwd=0.4) +
-      geom_line(data=df_so, aes(y=prev), col="blue", lwd=0.4) +
+    p4<- ggplot(data=df_sf,aes(x=x))+
+      geom_line(aes(y=prev, colour = "Farmers"), lwd=0.4) +
+      geom_line(data=df_so, aes(y=prev,colour = "Others"), lwd=0.4) +
+      scale_colour_manual("", 
+                          breaks = c("Farmers", "Others"),
+                          values = c("darkgreen","blue"))+
       geom_point(aes(x=field_work_mid,y=prev_farmer$prev))+
       geom_errorbar(aes(x=field_work_mid,ymin=prev_farmer$low_ci, ymax=prev_farmer$up_ci), width=.2,
                     position=position_dodge(.9), col="darkgreen") + 
       geom_point(aes(x=field_work_mid,y=prev_other$prev))+
       geom_errorbar(aes(x=field_work_mid,ymin=prev_other$low_ci, ymax=prev_other$up_ci), width=.2,
                     position=position_dodge(.9),col="blue")+ theme_bw()+
-      ylab("IgG seroprevalence (humans)") + xlab("day")
+      ylab("IgG seroprevalence (humans)") + xlab("Month")
     
     
     # R_t dependent on temp
@@ -185,10 +216,10 @@ plot_fits_function<-function(sim,observations){
     
     
     
-    p4<-    ggplot(data=Rt,aes(x=x))+ 
+    p5<-    ggplot(data=Rt,aes(x=x))+ 
       geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="blue", alpha=0.2)+
       geom_line(aes(y=`50%`), col="blue")+
-      ylab("R_t") + xlab("day")
+      ylab("R_t") + xlab("Month")
     
     # ggplot(data=Rt,aes(x=soil))+ 
     #   geom_point(aes(y=`50%`), col="red")+
@@ -196,7 +227,7 @@ plot_fits_function<-function(sim,observations){
     
     
     
-    gridExtra::grid.arrange(p1,p2,p3,p4)
+    gridExtra::grid.arrange(p1,p2,p3,p4,p5)
     
     
     

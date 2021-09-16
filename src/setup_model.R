@@ -88,7 +88,7 @@ params<-list(
   ###########################################################################################################
   # Time steps in days starts 1st April 2005 ends 31st March 2014
   ###########################################################################################################
-  nt =  nrow(temp_day),
+  nt =  nrow(temp_month),
   # 2.1. Livestock parameters
   ###########################################################################################################
   # Number of livestock age groups
@@ -101,11 +101,11 @@ params<-list(
     pop_st = c(0.4918, 0.2499, 0.1270, 0.0646, 0.0667),
    # pop_st = c(0.4234375, 0.2890625, 0.1375, 0.11875, 0.03125), # Mauritania
    # pop_st = pop <- c(0.2743, 0.2654, 0.186, 0.0973, 0.177),
-  mu_1=0.002643826, 
+  mu_1=0.002643826*30, 
   
   #daily death rate
   # deathd = c(0.002643826,0.002643826,0.002643826,0.002643826,0.002643826),
-  deathd=c(0.002686966, 0.002700065, 0.002680778, 0.002422176, 0.002944041), 
+  deathd=c(0.07618946, 0.07436794, 0.07466935, 0.07447458, 0.07470417) , 
   
   # Proportion of immune livestock at t0. Source?
   #imm_t0 <- c(0.05, 0.08,0.1,0.12,0.15)*4
@@ -117,11 +117,11 @@ params<-list(
   TOT = 1,
   
   # Duration of infectiousness in livestock (in days)
-  D_inf_L = 7,
+  D_inf_L = 7/30,
   
-  D_lact_liv=180, #(days)
+  D_lact_liv=270/30, #(days)
   
-  D_imm_liv=5*365,
+  D_imm_liv=(5*12),
   
   # 2.2. Parameters for humans
   ###########################################################################################################
@@ -140,17 +140,17 @@ params<-list(
   RR = 0.10,
   
   # Latent period in humans in days (to calculate the rate at which human move from latent to infectious)
-  D_lat_H = 4,
+  D_lat_H = 4/30,
   # Infectious period in humans in days (to calculate the rate at which human move from infectious to immune)
-  D_inf_H = 9,
+  D_inf_H = 9/30,
   # Duration immunity in humans
-  D_imm_H = 10*365,
+  D_imm_H = 10*12,
   # case fatality rate
   CFR = 0.33,
   
   # mortality and birth rates in human for constant pop size
   L = 61.5, # life span in years  between 2008 and 2014 https://data.worldbank.org/indicator/SP.DYN.LE00.IN?locations=AF 
-  b_d = 1/(61.5*365) # daily birth and death rate for constant pop 
+  b_d = (1/(61.5*12)) # daily birth and death rate for constant pop 
 )
 
 # Rate at which livestock and humans becomes infectious and immune
@@ -171,11 +171,10 @@ params$N_O <- round(params$N_hum*params$prop_o, digit=0)
 #17767
 # total farming population
 params$N_F <- params$N_hum - params$N_O
-params$b_d <- 1/(params$L*365) # daily birth and death rate for constant pop 
 params$Birth_F <- params$N_F*params$b_d
 params$Birth_O <- params$N_O*params$b_d
 params$Birth <-sum(params$pop_st*params$N_liv*params$deathd) 
-params$Ageing <- (1-params$deathd)/365
+params$Ageing <- (1-params$deathd)/12
 params$recover <- (1-params$deathd-params$Ageing)*params$time_immune_livestock
 
 # pass references

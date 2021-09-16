@@ -23,9 +23,9 @@ library(here)
 
 library(coda)
 
-country<- "SA"
-burn<- 0.5 # at what point in trace to chop burn-in runs
-thin_n<- 10 # sample every n runs (reduce autocorrelation) 
+country<- "AFG"
+burn<- 0.8 # at what point in trace to chop burn-in runs
+thin_n<- 5 # sample every n runs (reduce autocorrelation) 
 # analyse MCMC samples
 
 
@@ -71,7 +71,7 @@ trace_both <- mcmc(df_both)
 autocorr.plot(df_both)
 plot(trace_both)
 
-write.table(df1_2, here("output",country,"posteriors.txt"), sep = "\t" )
+write.table(df1_1, here("output",country,"posteriors.txt"), sep = "\t" )
 #####################################################################################
 plot(mcmc.trace1_1)
 plot(mcmc.trace.burned1_1)
