@@ -24,10 +24,13 @@ library(here)
 library (Rcpp)
 library(profvis)
 library(matrixStats)
+library(splines)
+library(data.table)
+library(broom)
 
 
 country<- "AFG"
-test_mode=0 # Set to 1 to run test parameter values
+test_mode=1 # Set to 1 to run test parameter values
 
 ########################################################################################
 # Part 1. Import set up: Load data and model parameters and functions
@@ -37,6 +40,8 @@ source(here("src","setup_data.R"))
 source(here("src","setup_model.R"))
 source(here("src","get_sim_results.R"))
 source(here("src","plot_fits_function.R"))
+source(here("src","spline_functions.R"))
+
 
 
 #Rcpp vectorized functions
@@ -64,7 +69,11 @@ if (test_mode==1){
     F_risk=4.92 , # risk for farmers
     O_factor=0.99,
     imm_p=0.6,
-    RRreport=0.74)
+    RRreport=0.74,
+    knot1=140,
+    knot2=300,
+    beta1=0.4)#
+    
 }else{
 
 # Load posterior samples
@@ -78,7 +87,10 @@ theta <- data.frame(
   F_risk=median(theta_in$F_risk)	, # risk for farmers
   O_factor=median(theta_in$O_factor),
   imm_p=median(theta_in$imm_p),
-  RRreport=median(theta_in$RRreport)
+  RRreport=median(theta_in$RRreport),
+  knot1=median(knot1$RRreport),
+  knot2=median(knot2$RRreport),
+  beta1=median(beta1$RRreport)
   )#
 }
 
