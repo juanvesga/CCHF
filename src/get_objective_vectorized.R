@@ -62,6 +62,17 @@ get_objective<-function(params,methd_intgr="euler"){
   #Define interp function to find temp factor for t
   foi_temp_factor_func <- approxfun(foi_temp_factor_df, rule = 2)
   params$foi_temp_factor_func<-foi_temp_factor_func
+  
+  # define spline function for disrupting event increasing Rt
+  x<-seq(0,1,length.out = params$nt)
+  knots <- as.numeric(c(params$theta[["knot1"]]/params$nt,params$theta[["knot2"]]/params$nt ,1000/params$nt ))
+  betas = c(0,params$theta[["beta1"]], 0.1, 0.1, 0.1, 0.1)
+  sdata <- genSpline(x, knots, 2, betas)
+  
+  foi_event_factor_df<-data.frame(times=seq(1,params$nt),spline=sdata$dt$y.spline*params$sp_hz)
+  params$foi_event_func <- approxfun(foi_event_factor_df, rule = 2)
+  
+  
   # Call model function and run with current Theta
   #########################################################################################################  
   

@@ -29,6 +29,7 @@ source(here("src","setup_data.R"))
 source(here("src","setup_model.R"))
 source(here("src","make_model.R"))
 source(here("src","get_sim_results.R"))
+source(here("src","spline_functions.R"))
 #Rcpp vectorized functions
 source(here("src","get_objective_vectorized.R"))
 source(here("src","goveqs_basis_rcpp.R"))
