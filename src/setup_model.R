@@ -150,7 +150,9 @@ params<-list(
   
   # mortality and birth rates in human for constant pop size
   L = 61.5, # life span in years  between 2008 and 2014 https://data.worldbank.org/indicator/SP.DYN.LE00.IN?locations=AF 
-  b_d = (1/(61.5*12)) # daily birth and death rate for constant pop 
+  b_d = (1/(61.5*12)), # daily birth and death rate for constant pop 
+  
+  sp_hz=5 # spline hazard multiplier. This value will be multiplied by spline 
 )
 
 # Rate at which livestock and humans becomes infectious and immune
