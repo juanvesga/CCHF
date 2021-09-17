@@ -68,6 +68,11 @@ get_objective<-function(params,methd_intgr="euler"){
   knots <- as.numeric(c(params$theta[["knot1"]]/params$nt,params$theta[["knot2"]]/params$nt ,1000/params$nt ))
   betas = c(0,params$theta[["beta1"]], 0.1, 0.1, 0.1, 0.1)
   sdata <- genSpline(x, knots, 2, betas)
+   
+  # mo<-seq(1,130,1)
+  # y<-sdata$dt$y.spline
+  # plot(mo,y*5,'l', ylim=c(0,5))
+  
   
   foi_event_factor_df<-data.frame(times=seq(1,params$nt),spline=sdata$dt$y.spline*params$sp_hz)
   params$foi_event_func <- approxfun(foi_event_factor_df, rule = 2)

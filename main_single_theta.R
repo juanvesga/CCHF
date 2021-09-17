@@ -70,8 +70,8 @@ if (test_mode==1){
     O_factor=0.99,
     imm_p=0.6,
     RRreport=0.74,
-    knot1=140,
-    knot2=300,
+    knot1=140/30,
+    knot2=300/30,
     beta1=0.4)#
     
 }else{

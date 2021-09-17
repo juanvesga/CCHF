@@ -15,7 +15,8 @@ rm(list = ls())
 # install.packages("pacman")         # Install pacman package
 library("pacman")                  # Load pacman package
 p_load(Hmisc,reshape2,zoo,plyr,ggplot2,gmodels,data.table,devtools,fitR,
-coda,deSolve,mvtnorm,ISOweek,lubridate,dplyr,zoo,stringr,here,Rcpp,psych)
+coda,deSolve,mvtnorm,ISOweek,lubridate,dplyr,zoo,stringr,here,Rcpp,psych,splines,
+data.table,broom)
 ########################################################################################
 # Part 0. select country
 ########################################################################################
@@ -42,7 +43,7 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 # Set MCMC important parameters 
 
 chain<-"chain1.csv"
-n_iterations<-5000
+n_iterations<-20000
 
 
 ###########################################################################################################
@@ -53,7 +54,10 @@ theta <- data.frame(
   F_risk=4.92 , # risk for farmers
   O_factor=0.99,
   imm_p=0.69,
-  RRreport=0.4)#
+  RRreport=0.4,
+  knot1=140/30,
+  knot2=300/30,
+  beta1=0.4)#
   
 # 2.1. MY PRIOR
 ###########################################################################################################
@@ -64,8 +68,15 @@ my_prior <- function(theta) {
   log.prior.F_risk <- dunif(theta[["F_risk"]],  min = 0, max = 5, log = TRUE) #0.01 / 5
   ## uniform prior on risk to others: scalar for risk to other occupations
   log.prior.O_factor <- dunif(theta[["O_factor"]], min = 0, max= 1, log = TRUE)
+  log.prior.imm_p <- dunif(theta[["imm_p"]], min = 0, max= 1, log = TRUE)
+  log.prior.RRreport <- dunif(theta[["RRreport"]], min = 0, max= 1, log = TRUE)
+  log.prior.knot1 <- dunif(theta[["knot1"]], min = 1, max= 9, log = TRUE)
+  log.prior.knot2 <- dunif(theta[["knot2"]], min = 9.1, max= 14, log = TRUE)
+  log.prior.beta1 <- dunif(theta[["beta1"]], min = 0, max= 1, log = TRUE)
   
-  return(log.prior.A  + log.prior.F_risk + log.prior.O_factor)
+  return(log.prior.A  + log.prior.F_risk + log.prior.O_factor +
+           log.prior.imm_p  + log.prior.RRreport + log.prior.knot1+
+           log.prior.knot2+log.prior.beta1)
 }
 my_prior(theta)
 
@@ -146,15 +157,33 @@ init.theta <-c(
   F_risk=3.4686 , # risk for farmers
   O_factor=0.3912015 ,
   imm_p=0.6494205,
-  RRreport=0.7406186)#
+  RRreport=0.7406186,
+  knot1=140/30,
+  knot2=300/30,
+  beta1=0.4)#
      
 proposal.sd <- init.theta/8
 
 n.iterations <- n_iterations
 print.info.every <- 10
 
-limits=list(lower=c(A= 0, F_risk=0, O_factor=0, imm_p=0, RRreport=0),
-            upper=c(A= Inf, F_risk=Inf, O_factor=Inf, imm_p=1, RRreport=1)) #inf!
+limits=list(lower=c(A= 0, 
+                    F_risk=0,
+                    O_factor=0,
+                    imm_p=0,
+                    RRreport=0,
+                    knot1=1, 
+                    knot2=9.1,
+                    beta1=0),
+            
+            upper=c(A= Inf, 
+                    F_risk=Inf, 
+                    O_factor=Inf, 
+                    imm_p=1, 
+                    RRreport=1,
+                    knot1=9, 
+                    knot2=14,
+                    beta1=1)) #inf!
 
 adapt.size.start <- 500
 adapt.size.cooling <- 0.999
