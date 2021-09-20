@@ -95,13 +95,45 @@ plot_fits_function<-function(sim,observations){
                     position=position_dodge(.9))+ theme_bw()+
       ylab("IgG seroprevalence (humans)") + xlab("Month")
     
+    # # R_t dependent on temp
+    # 
+    # 
+    # r_temp<-matrix(NA,params$nt,nrow(theta))
+    # for (jj in 1:nrow(theta) ){
+    #   for (tt in 1:length(soil_t)){
+    #     r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])
+    #   }
+    # }
+    # 
+    # 
+    # Rt <-as.data.frame(rowQuantiles((r_temp),probs=c(0.025,0.5,0.975)))
+    # Rt$x<-seq(1,params$nt)
+    # Rt$soil<-soil_t
+    # 
+    # 
+    # 
+    # p5<-    ggplot(data=Rt,aes(x=x))+ 
+    #   geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="blue", alpha=0.2)+
+    #   geom_line(aes(y=`50%`), col="blue")+
+    #   ylab("R_t") + xlab("Month")
+    
+    # ggplot(data=Rt,aes(x=soil))+ 
+    #   geom_point(aes(y=`50%`), col="red")+
+    #   ylab("R_t") + xlab("Celsius")
     # R_t dependent on temp
     
     
     r_temp<-matrix(NA,params$nt,nrow(theta))
     for (jj in 1:nrow(theta) ){
+      
+      x<-seq(0,1,length.out = params$nt)
+      knots <- as.numeric(c(theta$knot1[jj]/params$nt,theta$knot2[jj]/params$nt ,1000/params$nt ))
+      betas = c(0,theta$beta1[jj], 0.1, 0.1, 0.1, 0.1)
+      sdata <- genSpline(x, knots, 2, betas)
+      
+      
       for (tt in 1:length(soil_t)){
-        r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])
+        r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])*sdata$dt$y.spline[tt]*params$sp_hz
       }
     }
     
@@ -115,12 +147,7 @@ plot_fits_function<-function(sim,observations){
     p5<-    ggplot(data=Rt,aes(x=x))+ 
       geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="blue", alpha=0.2)+
       geom_line(aes(y=`50%`), col="blue")+
-      ylab("R_t") + xlab("Month")
-    
-    # ggplot(data=Rt,aes(x=soil))+ 
-    #   geom_point(aes(y=`50%`), col="red")+
-    #   ylab("R_t") + xlab("Celsius")
-    
+      ylab("R_t") + xlab("day")
     
     
     gridExtra::grid.arrange(p1,p2,p3,p4,p5)
@@ -202,10 +229,43 @@ plot_fits_function<-function(sim,observations){
     # R_t dependent on temp
     
     
+    # r_temp<-matrix(NA,params$nt,nrow(theta))
+    # for (jj in 1:nrow(theta) ){
+    #   for (tt in 1:length(soil_t)){
+    #     r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])
+    #   }
+    # }
+    # 
+    # 
+    # Rt <-as.data.frame(rowQuantiles((r_temp),probs=c(0.025,0.5,0.975)))
+    # Rt$x<-seq(1,params$nt)
+    # Rt$soil<-soil_t
+    # 
+    # 
+    # 
+    # p5<-    ggplot(data=Rt,aes(x=x))+ 
+    #   geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="blue", alpha=0.2)+
+    #   geom_line(aes(y=`50%`), col="blue")+
+    #   ylab("R_t") + xlab("Month")
+    # 
+    # ggplot(data=Rt,aes(x=soil))+ 
+    #   geom_point(aes(y=`50%`), col="red")+
+    #   ylab("R_t") + xlab("Celsius")
+    
+    # R_t dependent on temp
+    
+    
     r_temp<-matrix(NA,params$nt,nrow(theta))
     for (jj in 1:nrow(theta) ){
+      
+      x<-seq(0,1,length.out = params$nt)
+      knots <- as.numeric(c(theta$knot1[jj]/params$nt,theta$knot2[jj]/params$nt ,1000/params$nt ))
+      betas = c(0,theta$beta1[jj], 0.1, 0.1, 0.1, 0.1)
+      sdata <- genSpline(x, knots, 2, betas)
+      
+      
       for (tt in 1:length(soil_t)){
-        r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])
+        r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])*sdata$dt$y.spline[tt]*params$sp_hz
       }
     }
     
@@ -219,13 +279,7 @@ plot_fits_function<-function(sim,observations){
     p5<-    ggplot(data=Rt,aes(x=x))+ 
       geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="blue", alpha=0.2)+
       geom_line(aes(y=`50%`), col="blue")+
-      ylab("R_t") + xlab("Month")
-    
-    # ggplot(data=Rt,aes(x=soil))+ 
-    #   geom_point(aes(y=`50%`), col="red")+
-    #   ylab("R_t") + xlab("Celsius")
-    
-    
+      ylab("R_t") + xlab("day")
     
     gridExtra::grid.arrange(p1,p2,p3,p4,p5)
     
