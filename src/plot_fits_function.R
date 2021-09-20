@@ -133,7 +133,8 @@ plot_fits_function<-function(sim,observations){
       
       
       for (tt in 1:length(soil_t)){
-        r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])*sdata$dt$y.spline[tt]*params$sp_hz
+        r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])*
+          sdata$dt$y.spline[tt]*params$sp_hz*params$D_inf_L*sim$sus_l_frac
       }
     }
     
@@ -263,9 +264,9 @@ plot_fits_function<-function(sim,observations){
       betas = c(0,theta$beta1[jj], 0.1, 0.1, 0.1, 0.1)
       sdata <- genSpline(x, knots, 2, betas)
       
-      
       for (tt in 1:length(soil_t)){
-        r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])*sdata$dt$y.spline[tt]*params$sp_hz
+        r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])*
+          sdata$dt$y.spline[tt]*params$sp_hz*params$D_inf_L*sim$sus_l_frac
       }
     }
     

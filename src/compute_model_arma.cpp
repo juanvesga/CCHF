@@ -32,17 +32,18 @@ arma::vec compute_model(
     double t) {
   
   // time dependent Functions to num vector
+  double N_livestock =sum(invec(livest_indx));
   Rcpp::NumericVector temperature_r_factor = func(t);
   Rcpp::NumericVector spline_event_factor = func_event(t);
   
   // -- Get force of infection
-  arma::vec lam = spline_event_factor[0]*lambda*invec;
+  arma::vec lam = lambda*invec/N_livestock;
   
   // -- Get all model components together
   arma::mat allmat (linear +  
     lam(0) * nlin_livestock * temperature_r_factor[0] +
-    lam(1) * nlin_farmer +
-    lam(2) * nlin_other);
+    lam(1) * spline_event_factor[0]*nlin_farmer +
+    lam(2) * spline_event_factor[0]*nlin_other);
   
   
   arma::vec dx = allmat*invec;
@@ -52,10 +53,11 @@ arma::vec compute_model(
   dx = dx - morts;
   
   //  Implement births
-  double liv_prev= sum(invec(livest_prev_indx))/sum(invec(livest_indx));
+    
+  double liv_prev= sum(invec(livest_prev_indx))/N_livestock;
   
-  dx(sus_a1_liv_indx) = dx(sus_a1_liv_indx)+birth_livestock*(1-liv_prev) ;
-  dx(livest_pass_imm_indx) = dx(livest_pass_imm_indx)+birth_livestock*liv_prev ;
+  dx(sus_a1_liv_indx) = dx(sus_a1_liv_indx)+birth_livestock*N_livestock*(1-liv_prev) ;
+  dx(livest_pass_imm_indx) = dx(livest_pass_imm_indx)+birth_livestock*N_livestock*liv_prev ;
   
   dx(sus_farmer_indx) = dx(sus_farmer_indx)+birth_farmer ;
   dx(sus_other_indx)  = dx(sus_other_indx)+birth_other ;

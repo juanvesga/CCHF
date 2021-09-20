@@ -65,9 +65,9 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 ###########################################################################################################
 if (test_mode==1){
   theta <- data.frame(
-    A=0.07546031, # driving temperature dependent force of infection
-    F_risk=3.468, # risk for farmers
-    O_factor=0.3912,
+    A=0.5546031, # driving temperature dependent force of infection
+    F_risk=0.1, # risk for farmers
+    O_factor=0.1,
     imm_p=0.649,
     RRreport=0.90,
     knot1=140/30,
@@ -106,6 +106,7 @@ sim<-get_sim_results(theta)
  # pdf(here("output",country,"model_proj_3motickcycle.pdf")) 
 
 plot_fits_function(sim,observations)
+
 
  # dev.off() 
 

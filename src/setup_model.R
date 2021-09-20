@@ -175,7 +175,7 @@ params$N_O <- round(params$N_hum*params$prop_o, digit=0)
 params$N_F <- params$N_hum - params$N_O
 params$Birth_F <- params$N_F*params$b_d
 params$Birth_O <- params$N_O*params$b_d
-params$Birth <-sum(params$pop_st*params$N_liv*params$deathd) 
+params$Birth <-sum(params$pop_st*params$deathd) 
 params$Ageing <- (1-params$deathd)/12
 params$recover <- (1-params$deathd-params$Ageing)*params$time_immune_livestock
 

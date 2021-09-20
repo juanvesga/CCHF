@@ -180,17 +180,17 @@ observations<-list(
 #Functions
 
 # Find FOI factor according to Soil temperature
-# temp_foi_func<-function(celsius,temp_foi_factor,min_limit=min(soil_t)){
-#   if (celsius<=30){
-#     x<-(temp_foi_factor*(celsius - min_limit))
-# 
-#   }else if(celsius>30){
-#     x<-temp_foi_factor*(30-(celsius-30)-min_limit)
-#   }
-#   return(x)
-# }
-# 
 temp_foi_func<-function(celsius,temp_foi_factor,min_limit=min(soil_t)){
-  x<-(temp_foi_factor*(min(celsius,30) - min_limit))
+  if (celsius<=30){
+    x<-(temp_foi_factor*(celsius - min_limit))
+
+  }else if(celsius>30){
+    x<-temp_foi_factor*(30-(celsius-30)-min_limit)
+  }
   return(x)
 }
+# 
+# temp_foi_func<-function(celsius,temp_foi_factor,min_limit=min(soil_t)){
+#   x<-(temp_foi_factor*(min(celsius,30) - min_limit))
+#   return(x)
+# }

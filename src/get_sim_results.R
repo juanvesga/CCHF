@@ -9,6 +9,7 @@ get_sim_results<- function(theta){
   h_inc_year <- matrix(NA, nrow=nruns, ncol=yr_length)
   l_prev_age <- matrix(NA, nrow=nruns, ncol=5)
   l_prev_all <- matrix(NA, nrow=nruns, ncol=1)
+  sus_l_frac <- matrix(NA, nrow=nruns, ncol=1)
   h_prev_farmer <- matrix(NA, nrow=nruns, ncol=1)
   h_prev_other  <- matrix(NA, nrow=nruns, ncol=1)
   l_prev_all_long <- matrix(NA, nrow=nruns, ncol=mo_length)
@@ -130,6 +131,10 @@ get_sim_results<- function(theta){
     h_prev_other_long[jj,]<- out$O_R/c(out$O_S + out$O_E + out$O_I + out$O_R)
     
     
+    # susceptible fraction of livestock
+    sus_l_frac[jj]<-c(out$L_S1+out$L_S2+out$L_S3+out$L_S4+
+                        out$L_S5)/simu_all_N
+    
     
   }
   
@@ -145,7 +150,8 @@ get_sim_results<- function(theta){
     h_prev_other  = h_prev_other,
     l_prev_all_long = l_prev_all_long,
     h_prev_farmer_long = h_prev_farmer_long,
-    h_prev_other_long  = h_prev_other_long
+    h_prev_other_long  = h_prev_other_long,
+    sus_l_frac = sus_l_frac
     # 
   )
   

@@ -71,9 +71,14 @@ make_model<-function(p){
   
   # --- Getting force-of-infection for all groups
   tmp <-matrix(0,3,i$nstates)    # 1.Livestock, 2.Farmer, 3.Other
-  tmp[1,s$L_I]  <- 1 - exp(-(1/(p$D_inf_L*p$N_liv)))
-  tmp[2,s$L_I]  <- 1 - exp((-p$theta[["F_risk"]]/1e6))
-  tmp[3,s$L_I]  <- 1 - exp((-p$risk_O/1e6))
+  # tmp[1,s$L_I]  <- 1 - exp(-(1/(p$D_inf_L*p$N_liv)))
+  # tmp[2,s$L_I]  <- 1 - exp((-p$theta[["F_risk"]]/1e6))
+  # tmp[3,s$L_I]  <- 1 - exp((-p$risk_O/1e6))
+   tmp[1,s$L_I]  <- 1
+   tmp[2,s$L_I]  <- p$theta[["F_risk"]]
+   tmp[3,s$L_I]  <- p$risk_O
+  
+  
   
   M$lambda <- tmp
   
