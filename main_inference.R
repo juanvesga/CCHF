@@ -16,7 +16,7 @@ rm(list = ls())
 library("pacman")                  # Load pacman package
 p_load(Hmisc,reshape2,zoo,plyr,ggplot2,gmodels,data.table,devtools,fitR,
 coda,deSolve,mvtnorm,ISOweek,lubridate,dplyr,zoo,stringr,here,Rcpp,psych,splines,
-data.table,broom)
+data.table,broom, psych)
 ########################################################################################
 # Part 0. select country
 ########################################################################################
@@ -153,19 +153,19 @@ my_posterior <- function(theta) {
 #  PART 3. Inference MCMC-MH
 ###########################################################################################################
 init.theta <-c(  
-  A= 0.07546031, # driving temperature dependent force of infection
-  F_risk=3.4686 , # risk for farmers
-  O_factor=0.3912015 ,
-  imm_p=0.6494205,
-  RRreport=0.7406186,
-  knot1=140/30,
-  knot2=300/30,
-  beta1=0.4)#
+  A= 0.08, # driving temperature dependent force of infection
+  F_risk=4.97 , # risk for farmers
+  O_factor=0.69,
+  imm_p=0.94,
+  RRreport=0.91,
+  knot1=4.5,
+  knot2=10,
+  beta1=0.55)#
      
 proposal.sd <- init.theta/8
 
 n.iterations <- n_iterations
-print.info.every <- 10
+print.info.every <- 20
 
 limits=list(lower=c(A= 0, 
                     F_risk=0,

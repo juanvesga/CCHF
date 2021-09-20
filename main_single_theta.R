@@ -27,7 +27,7 @@ library(matrixStats)
 library(splines)
 library(data.table)
 library(broom)
-
+library(psych)
 
 country<- "AFG"
 test_mode=1 # Set to 1 to run test parameter values
@@ -65,11 +65,11 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 ###########################################################################################################
 if (test_mode==1){
   theta <- data.frame(
-    A=0.08, # driving temperature dependent force of infection
-    F_risk=4.92 , # risk for farmers
-    O_factor=0.99,
-    imm_p=0.6,
-    RRreport=0.74,
+    A=0.07546031, # driving temperature dependent force of infection
+    F_risk=3.468, # risk for farmers
+    O_factor=0.3912,
+    imm_p=0.649,
+    RRreport=0.90,
     knot1=140/30,
     knot2=300/30,
     beta1=0.4)#
@@ -98,6 +98,7 @@ theta <- data.frame(
 # profvis({  
 
 sim<-get_sim_results(theta)
+
  
 # })
 
