@@ -43,7 +43,7 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 # Set MCMC important parameters 
 
 chain<-"chain1.csv"
-n_iterations<-20000
+n_iterations<-5000
 
 
 ###########################################################################################################
@@ -153,16 +153,16 @@ my_posterior <- function(theta) {
 #  PART 3. Inference MCMC-MH
 ###########################################################################################################
 init.theta <-c(  
-  A= 0.08, # driving temperature dependent force of infection
-  F_risk=4.97 , # risk for farmers
-  O_factor=0.69,
-  imm_p=0.94,
-  RRreport=0.91,
-  knot1=4.5,
-  knot2=10,
-  beta1=0.55)#
+  A= 0.09, # driving temperature dependent force of infection
+  F_risk=4.13 , # risk for farmers
+  O_factor=0.21,
+  imm_p=0.88,
+  RRreport=0.87,
+  knot1=4.40,
+  knot2=12.44,
+  beta1=0.99)#
      
-proposal.sd <- init.theta/8
+proposal.sd <- init.theta/10
 
 n.iterations <- n_iterations
 print.info.every <- 20
