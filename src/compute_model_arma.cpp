@@ -13,6 +13,7 @@ arma::vec compute_model(
     const arma::mat& nlin_other,
     Rcpp::Function func,
     Rcpp::Function func_event,
+    Rcpp::Function func_inflx_L,
     const arma::vec& mortvec,
     double birth_livestock,
     double birth_farmer,
@@ -26,6 +27,8 @@ arma::vec compute_model(
     arma::uvec livest_indx,
     arma::uvec livest_prev_indx,
     arma::uvec livest_pass_imm_indx,
+    arma::uvec inf_liv_indx,
+    arma::vec& pop_st,
     const arma::mat& agg_inc,
     const arma::mat& agg_mort,
     const arma::mat& sel_inc,
@@ -35,6 +38,7 @@ arma::vec compute_model(
   double N_livestock =sum(invec(livest_indx));
   Rcpp::NumericVector temperature_r_factor = func(t);
   Rcpp::NumericVector spline_event_factor = func_event(t);
+  Rcpp::NumericVector animals_in = func_inflx_L(t);
   
   // -- Get force of infection
   arma::vec lam = lambda*invec/N_livestock;
@@ -56,12 +60,14 @@ arma::vec compute_model(
     
   double liv_prev= sum(invec(livest_prev_indx))/N_livestock;
   
-  dx(sus_a1_liv_indx) = dx(sus_a1_liv_indx)+birth_livestock*N_livestock*(1-liv_prev) ;
-  dx(livest_pass_imm_indx) = dx(livest_pass_imm_indx)+birth_livestock*N_livestock*liv_prev ;
+  dx(sus_a1_liv_indx) = dx(sus_a1_liv_indx)+sum(morts)*(1-liv_prev) ;
+  dx(livest_pass_imm_indx) = dx(livest_pass_imm_indx)+sum(morts)*liv_prev ;
   
   dx(sus_farmer_indx) = dx(sus_farmer_indx)+birth_farmer ;
   dx(sus_other_indx)  = dx(sus_other_indx)+birth_other ;
   
+  // Influx of infected animals 
+  dx(inf_liv_indx) = dx(inf_liv_indx) + animals_in[0]*pop_st; 
   
   // Get the auxiliaries
   arma::vec ou(n_aux, arma::fill::zeros);

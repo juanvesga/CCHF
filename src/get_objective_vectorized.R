@@ -78,6 +78,16 @@ get_objective<-function(params,methd_intgr="euler"){
   params$foi_event_func <- approxfun(foi_event_factor_df, rule = 2)
   
   
+  # infectious livestock influx
+  l_inflx<-logistic(seq(1,params$nt),d=params$nt*0.72, 
+                    a=0.2*params$nt/100,
+                    c=0, z=1)*params$theta[["animal_in"]]
+  
+  
+  animalinf_df<-data.frame(times=seq(1,params$nt),influx=l_inflx)
+  params$l_inflx_func <- approxfun(animalinf_df, rule = 2)
+  
+  
   # Call model function and run with current Theta
   #########################################################################################################  
   

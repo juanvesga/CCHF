@@ -134,7 +134,7 @@ plot_fits_function<-function(sim,observations){
       
       for (tt in 1:length(soil_t)){
         r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])*
-          sdata$dt$y.spline[tt]*params$sp_hz*params$D_inf_L*sim$sus_l_frac
+          sdata$dt$y.spline[tt]*params$sp_hz*params$D_inf_L*sim$sus_l_frac[jj,tt]
       }
     }
     
@@ -266,7 +266,7 @@ plot_fits_function<-function(sim,observations){
       
       for (tt in 1:length(soil_t)){
         r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])*
-          sdata$dt$y.spline[tt]*params$sp_hz*params$D_inf_L*sim$sus_l_frac
+          sdata$dt$y.spline[tt]*params$sp_hz*params$D_inf_L*sim$sus_l_frac[jj,tt]
       }
     }
     
@@ -282,7 +282,19 @@ plot_fits_function<-function(sim,observations){
       geom_line(aes(y=`50%`), col="blue")+
       ylab("R_t") + xlab("day")
     
-    gridExtra::grid.arrange(p1,p2,p3,p4,p5)
+    
+    # Plot SIR
+    
+    df<-data.frame(t(rbind(seq(1,params$nt),sim$s_L,sim$i_L,sim$r_L)))
+    names(df)<-c("month","S","I","R")
+    df_melt<-reshape2::melt(df,id="month")
+    
+    p6<-ggplot(data=df_melt,aes(x=month,y=value))+
+      geom_line(aes(color=variable))+
+      ylab("Number") + xlab("month")
+      
+    
+    gridExtra::grid.arrange(p1,p2,p3,p4,p5,p6)
     
     
     

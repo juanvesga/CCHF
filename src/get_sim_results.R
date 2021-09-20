@@ -9,12 +9,15 @@ get_sim_results<- function(theta){
   h_inc_year <- matrix(NA, nrow=nruns, ncol=yr_length)
   l_prev_age <- matrix(NA, nrow=nruns, ncol=5)
   l_prev_all <- matrix(NA, nrow=nruns, ncol=1)
-  sus_l_frac <- matrix(NA, nrow=nruns, ncol=1)
+  sus_l_frac <- matrix(NA, nrow=nruns, ncol=mo_length)
   h_prev_farmer <- matrix(NA, nrow=nruns, ncol=1)
   h_prev_other  <- matrix(NA, nrow=nruns, ncol=1)
   l_prev_all_long <- matrix(NA, nrow=nruns, ncol=mo_length)
   h_prev_farmer_long <- matrix(NA, nrow=nruns, ncol=mo_length)
   h_prev_other_long  <- matrix(NA, nrow=nruns, ncol=mo_length)
+  s_L <- matrix(NA, nrow=nruns, ncol=mo_length)
+  i_L <- matrix(NA, nrow=nruns, ncol=mo_length)
+  r_L <- matrix(NA, nrow=nruns, ncol=mo_length)
   
   
   for (jj in 1:nruns){
@@ -25,7 +28,7 @@ get_sim_results<- function(theta){
                       F_risk=theta$F_risk[jj], 
                       O_factor=theta$O_factor[jj],
                       imm_p=theta$imm_p[jj],
-                      RRreport=theta$RRreport[jj],
+                      animal_in=theta$animal_in[jj],
                       knot1=theta$knot1[jj],
                       knot2=theta$knot2[jj],
                       beta1=theta$beta1[jj])
@@ -51,19 +54,19 @@ get_sim_results<- function(theta){
     
     
     
-    RRyear<-logistic(seq(1,yr_length),d=yr_length*0.72, 
-                  a=2,
-                  c=params$RR/params$theta[["RRreport"]], z=1)*params$theta[["RRreport"]]
-    
+    # RRyear<-logistic(seq(1,yr_length),d=yr_length*0.72, 
+    #               a=2,
+    #               c=params$RR/params$theta[["RRreport"]], z=1)*params$theta[["RRreport"]]
+    # 
     # plot(seq(1,yr_length),RRyear)
     
     # RRmonth<- c(rep(params$RR,(2013-2008)*12),seq(params$RR, params$theta[["RRreport"]],
     #                                     length.out=(mo_length-(2013-2008)*12)-1))
   
-    RRmonth<-logistic(seq(1,mo_length-1),d=(mo_length-1)*0.72, 
-                     a=0.2*(mo_length-1)/100,
-                     c=params$RR/params$theta[["RRreport"]], z=1)*params$theta[["RRreport"]]
-    
+    # RRmonth<-logistic(seq(1,mo_length-1),d=(mo_length-1)*0.72, 
+    #                  a=0.2*(mo_length-1)/100,
+    #                  c=params$RR/params$theta[["RRreport"]], z=1)*params$theta[["RRreport"]]
+    # 
    # plot(seq(1,mo_length-1),RRmonth)
     
     
@@ -82,8 +85,8 @@ get_sim_results<- function(theta){
        summarise(reported=sum(cases))%>%
        mutate(cases=ifelse(reported==0,NA,as.numeric(paste(reported))))
     
-    h_inc_month[jj,]<- tmp$cases* RRmonth
-    h_inc_year[jj,]<-  human_inc_yr$cases * RRyear
+    h_inc_month[jj,]<- tmp$cases*params$RR
+    h_inc_year[jj,]<-  human_inc_yr$cases * params$RR
     
     # Livestock prevalence by age 
     L_1<-out$L_S1+out$L_I1+out$L_R1+out$L_Ri
@@ -114,7 +117,7 @@ get_sim_results<- function(theta){
     simu_all_R<-mean(simu_all_R[(field_work_start:field_work_end)])
     simu_all_N<-mean(simu_all_N[(field_work_start:field_work_end)])
     l_prev_all[jj]<-simu_all_R/simu_all_N
-    
+   
     # Human prevalence (farmers and others)
     
     simu_F_R<-  mean(out$F_R[(field_work_start:field_work_end)])
@@ -132,8 +135,16 @@ get_sim_results<- function(theta){
     
     
     # susceptible fraction of livestock
-    sus_l_frac[jj]<-c(out$L_S1+out$L_S2+out$L_S3+out$L_S4+
+    sus_l_frac[jj,]<-c(out$L_S1+out$L_S2+out$L_S3+out$L_S4+
                         out$L_S5)/simu_all_N
+    s_L[jj,]<-c(out$L_S1+out$L_S2+out$L_S3+out$L_S4+
+                  out$L_S5)
+    
+    i_L[jj,]<-c(out$L_I1+out$L_I2+out$L_I3+out$L_I4+
+                  out$L_I5)
+    
+    r_L[jj,]<-c(out$L_R1+out$L_R2+out$L_R3+out$L_R4+
+                  out$L_R5+out$L_Ri )
     
     
   }
@@ -151,7 +162,11 @@ get_sim_results<- function(theta){
     l_prev_all_long = l_prev_all_long,
     h_prev_farmer_long = h_prev_farmer_long,
     h_prev_other_long  = h_prev_other_long,
-    sus_l_frac = sus_l_frac
+    sus_l_frac = sus_l_frac,
+    s_L=s_L,
+    i_L=i_L,
+    r_L=r_L
+    
     # 
   )
   
