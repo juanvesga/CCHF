@@ -1,6 +1,6 @@
 plot_fits_function<-function(sim,observations){
   
-  windows()
+  # windows()
   
   if (nrow(sim$h_inc_month)>1)
     # #################################################################
@@ -134,7 +134,7 @@ plot_fits_function<-function(sim,observations){
       
       for (tt in 1:length(soil_t)){
         r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])*
-          sdata$dt$y.spline[tt]*params$sp_hz*params$D_inf_L*sim$sus_l_frac
+          sdata$dt$y.spline[tt]*params$sp_hz*params$D_inf_L*sim$sus_l_frac[jj,tt]
       }
     }
     

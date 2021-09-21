@@ -9,7 +9,7 @@ get_sim_results<- function(theta){
   h_inc_year <- matrix(NA, nrow=nruns, ncol=yr_length)
   l_prev_age <- matrix(NA, nrow=nruns, ncol=5)
   l_prev_all <- matrix(NA, nrow=nruns, ncol=1)
-  sus_l_frac <- matrix(NA, nrow=nruns, ncol=1)
+  sus_l_frac <- matrix(NA, nrow=nruns, ncol=mo_length)
   h_prev_farmer <- matrix(NA, nrow=nruns, ncol=1)
   h_prev_other  <- matrix(NA, nrow=nruns, ncol=1)
   l_prev_all_long <- matrix(NA, nrow=nruns, ncol=mo_length)
@@ -109,10 +109,10 @@ get_sim_results<- function(theta){
     l_prev_age[jj,] <- simu_age_R / simu_age_N
     
     simu_all_R<-c(out$L_Ri+out$L_R1+out$L_R2+out$L_R3+out$L_R4+out$L_R5)
-    simu_all_N<-c(L_1+L_2+L_3+L_4+L_5)
-    l_prev_all_long[jj,]<-simu_all_R/simu_all_N
+    simu_all_N_long<-c(L_1+L_2+L_3+L_4+L_5)
+    l_prev_all_long[jj,]<-simu_all_R/simu_all_N_long
     simu_all_R<-mean(simu_all_R[(field_work_start:field_work_end)])
-    simu_all_N<-mean(simu_all_N[(field_work_start:field_work_end)])
+    simu_all_N<-mean(simu_all_N_long[(field_work_start:field_work_end)])
     l_prev_all[jj]<-simu_all_R/simu_all_N
     
     # Human prevalence (farmers and others)
@@ -132,8 +132,8 @@ get_sim_results<- function(theta){
     
     
     # susceptible fraction of livestock
-    sus_l_frac[jj]<-c(out$L_S1+out$L_S2+out$L_S3+out$L_S4+
-                        out$L_S5)/simu_all_N
+    sus_l_frac[jj,]<-c(out$L_S1+out$L_S2+out$L_S3+out$L_S4+
+                        out$L_S5)/simu_all_N_long
     
     
   }

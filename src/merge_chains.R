@@ -24,8 +24,10 @@ library(here)
 library(coda)
 
 country<- "AFG"
-burn<- 0.8 # at what point in trace to chop burn-in runs
-thin_n<- 5 # sample every n runs (reduce autocorrelation) 
+
+
+burn<- 0.7 # at what point in trace to chop burn-in runs
+thin_n<- 20 # sample every n runs (reduce autocorrelation) 
 # analyse MCMC samples
 
 

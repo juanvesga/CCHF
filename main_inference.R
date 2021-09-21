@@ -43,7 +43,7 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 # Set MCMC important parameters 
 
 chain<-"chain1.csv"
-n_iterations<-5000
+n_iterations<-20000
 
 
 ###########################################################################################################
@@ -63,7 +63,7 @@ theta <- data.frame(
 ###########################################################################################################
 my_prior <- function(theta) {
   ## uniform prior on A
-  log.prior.A <- dunif(theta[["A"]], min = 0.03, max = 0.1, log = TRUE) 
+  log.prior.A <- dunif(theta[["A"]], min = 0, max = 1, log = TRUE) 
   ## uniform prior on risk to farmers infected
   log.prior.F_risk <- dunif(theta[["F_risk"]],  min = 0, max = 5, log = TRUE) #0.01 / 5
   ## uniform prior on risk to others: scalar for risk to other occupations
@@ -153,19 +153,19 @@ my_posterior <- function(theta) {
 #  PART 3. Inference MCMC-MH
 ###########################################################################################################
 init.theta <-c(  
-  A= 0.09, # driving temperature dependent force of infection
-  F_risk=4.13 , # risk for farmers
-  O_factor=0.21,
-  imm_p=0.88,
-  RRreport=0.87,
-  knot1=4.40,
-  knot2=12.44,
-  beta1=0.99)#
+  A=0.5546031, # driving temperature dependent force of infection
+  F_risk=0.1, # risk for farmers
+  O_factor=0.1,
+  imm_p=0.649,
+  RRreport=0.90,
+  knot1=140/30,
+  knot2=300/30,
+  beta1=0.4)#
      
 proposal.sd <- init.theta/10
 
 n.iterations <- n_iterations
-print.info.every <- 20
+print.info.every <- 100
 
 limits=list(lower=c(A= 0, 
                     F_risk=0,
