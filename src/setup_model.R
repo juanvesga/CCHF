@@ -119,7 +119,7 @@ params<-list(
   # Duration of infectiousness in livestock (in days)
   D_inf_L = 7/30,
   
-  D_lact_liv=270/30, #(days)
+  D_lact_liv=6, #(days)
   
   D_imm_liv=(5*12),
   
