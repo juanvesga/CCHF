@@ -14,9 +14,6 @@ arma::vec compute_model(
     Rcpp::Function func,
     Rcpp::Function func_event,
     const arma::vec& mortvec,
-    double birth_livestock,
-    double birth_farmer,
-    double birth_other,
     int n_aux,
     arma::uvec sus_a1_liv_indx,
     arma::uvec sus_farmer_indx,
@@ -26,6 +23,8 @@ arma::vec compute_model(
     arma::uvec livest_indx,
     arma::uvec livest_prev_indx,
     arma::uvec livest_pass_imm_indx,
+    arma::uvec farmer_indx,
+    arma::uvec other_indx,
     const arma::mat& agg_inc,
     const arma::mat& agg_mort,
     const arma::mat& sel_inc,
@@ -53,14 +52,14 @@ arma::vec compute_model(
   dx = dx - morts;
   
   //  Implement births
-    
+  
   double liv_prev= sum(invec(livest_prev_indx))/N_livestock;
   
-  dx(sus_a1_liv_indx) = dx(sus_a1_liv_indx)+sum(morts)*(1-liv_prev) ;
-  dx(livest_pass_imm_indx) = dx(livest_pass_imm_indx)+sum(morts)*liv_prev ;
+  dx(sus_a1_liv_indx) = dx(sus_a1_liv_indx)+sum(morts(livest_indx))*(1-liv_prev) ;
+  dx(livest_pass_imm_indx) = dx(livest_pass_imm_indx)+sum(morts(livest_indx))*liv_prev ;
   
-  dx(sus_farmer_indx) = dx(sus_farmer_indx)+birth_farmer ;
-  dx(sus_other_indx)  = dx(sus_other_indx)+birth_other ;
+  dx(sus_farmer_indx) = dx(sus_farmer_indx)+sum(morts(farmer_indx)) ;
+  dx(sus_other_indx)  = dx(sus_other_indx)+sum(morts(other_indx)) ;
   
   
   // Get the auxiliaries

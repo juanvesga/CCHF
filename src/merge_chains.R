@@ -26,8 +26,8 @@ library(coda)
 country<- "AFG"
 
 
-burn<- 0.7 # at what point in trace to chop burn-in runs
-thin_n<- 20 # sample every n runs (reduce autocorrelation) 
+burn<- 0.8 # at what point in trace to chop burn-in runs
+thin_n<- 5 # sample every n runs (reduce autocorrelation) 
 # analyse MCMC samples
 
 
@@ -75,6 +75,7 @@ plot(trace_both)
 
 write.table(df1_1, here("output",country,"posteriors.txt"), sep = "\t" )
 #####################################################################################
+windows()
 plot(mcmc.trace1_1)
 plot(mcmc.trace.burned1_1)
 autocorr.plot(mcmc.trace.burned1_1)

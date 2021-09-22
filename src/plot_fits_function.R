@@ -1,6 +1,6 @@
 plot_fits_function<-function(sim,observations){
   
-  # windows()
+    # windows()
   
   if (nrow(sim$h_inc_month)>1)
     # #################################################################
@@ -35,6 +35,37 @@ plot_fits_function<-function(sim,observations){
                        limits=c("0-1","","1-2","","2-3","","3-4","","4+",""))+
       ylim(c(0,1))
     
+    # preva;ence by age
+    
+    df0<-as.data.frame(rowQuantiles(t(sim$l_prev_0_long),probs=c(0.025,0.5,0.975)))
+    df0$x<-seq(1,params$nt)
+    df1<-as.data.frame(rowQuantiles(t(sim$l_prev_1_long),probs=c(0.025,0.5,0.975)))
+    df1$x<-seq(1,params$nt)
+    df2<-as.data.frame(rowQuantiles(t(sim$l_prev_2_long),probs=c(0.025,0.5,0.975)))
+    df2$x<-seq(1,params$nt)
+    df3<-as.data.frame(rowQuantiles(t(sim$l_prev_3_long),probs=c(0.025,0.5,0.975)))
+    df3$x<-seq(1,params$nt)
+    df4<-as.data.frame(rowQuantiles(t(sim$l_prev_4_long),probs=c(0.025,0.5,0.975)))
+    df4$x<-seq(1,params$nt)
+    
+    
+    
+    p2<-ggplot(df0, aes(x=x))+
+      geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="blue", alpha=0.2)+
+      geom_line(aes(y=`50%`, color="Age0_1"))+
+      geom_ribbon(data=df1,aes(ymin=`2.5%`,ymax=`97.5%`), fill="red", alpha=0.2)+
+      geom_line(data=df1,aes(y=`50%`,color="Age1_2"))+
+      geom_ribbon(data=df2,aes(ymin=`2.5%`,ymax=`97.5%`), fill="orange", alpha=0.2)+
+      geom_line(data=df2,aes(y=`50%`,color="Age2_3"))+
+      geom_ribbon(data=df3,aes(ymin=`2.5%`,ymax=`97.5%`), fill="purple", alpha=0.2)+
+      geom_line(data=df3,aes(y=`50%`, color="Age3_4"))+
+      geom_ribbon(data=df4,aes(ymin=`2.5%`,ymax=`97.5%`), fill="darkgreen", alpha=0.2)+
+      geom_line(data=df4,aes(y=`50%` ,color="Age4+"))+
+      scale_colour_manual("", 
+                          breaks = c("Age0_1", "Age1_2", "Age2_3","Age3_4","Age4+"),
+                          values = c("blue", "red", "orange","purple","darkgreen")) +
+      ylab("Seroprevalence") + xlab("Month")+ylim(0,1)
+    
     
     
     # Human cases 
@@ -47,7 +78,7 @@ plot_fits_function<-function(sim,observations){
     df_sim<-data.frame(x=mo, t(sim$h_inc_mo))
     dat_sim<-reshape2::melt(df_sim, id="x")
     
-    p2<- ggplot(data=df_s, aes(x=x))+
+    p3<- ggplot(data=df_s, aes(x=x))+
       geom_line(data=dat_sim, aes(x=x, y=value, group=variable), col="grey", 
                 alpha=0.2, lwd=0.4) +
       geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="darkgreen", alpha=0.2)+
@@ -65,7 +96,7 @@ plot_fits_function<-function(sim,observations){
     df_sim<-data.frame(x=yr, t(sim$h_inc_year))
     dat_sim<-reshape2::melt(df_sim, id="x")
     
-    p3<- ggplot(data=df_s, aes(x=x))+
+    p4<- ggplot(data=df_s, aes(x=x))+
       geom_line(data=dat_sim, aes(x=x, y=value, group=variable), col="grey", 
                 alpha=0.2, lwd=0.4) +
       geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="darkgreen", alpha=0.2)+
@@ -82,7 +113,7 @@ plot_fits_function<-function(sim,observations){
     df_so$x<- seq(1:params$nt)
     
     
-    p4<- ggplot(data=df_sf,aes(x=x))+
+    p5<- ggplot(data=df_sf,aes(x=x))+
       geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="darkgreen", alpha=0.2)+
       geom_line(aes(y=`50%`), col="darkgreen", lwd=0.4) +
       geom_ribbon(data=df_so,aes(ymin=`2.5%`,ymax=`97.5%`), fill="blue", alpha=0.2)+
@@ -145,13 +176,13 @@ plot_fits_function<-function(sim,observations){
     
     
     
-    p5<-    ggplot(data=Rt,aes(x=x))+ 
+    p6<-    ggplot(data=Rt,aes(x=x))+ 
       geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="blue", alpha=0.2)+
       geom_line(aes(y=`50%`), col="blue")+
       ylab("R_t") + xlab("day")
     
     
-    gridExtra::grid.arrange(p1,p2,p3,p4,p5)
+    gridExtra::grid.arrange(p1,p2,p3,p4,p5,p6)
     
   }
   # #################################################################
@@ -180,6 +211,40 @@ plot_fits_function<-function(sim,observations){
     
     
     
+    # Prvalence by age 
+    
+    df0<-as.data.frame(rowQuantiles(t(sim$l_prev_0_long),probs=c(0.025,0.5,0.975)))
+    df0$x<-seq(1,params$nt)
+    df1<-as.data.frame(rowQuantiles(t(sim$l_prev_1_long),probs=c(0.025,0.5,0.975)))
+    df1$x<-seq(1,params$nt)
+    df2<-as.data.frame(rowQuantiles(t(sim$l_prev_2_long),probs=c(0.025,0.5,0.975)))
+    df2$x<-seq(1,params$nt)
+    df3<-as.data.frame(rowQuantiles(t(sim$l_prev_3_long),probs=c(0.025,0.5,0.975)))
+    df3$x<-seq(1,params$nt)
+    df4<-as.data.frame(rowQuantiles(t(sim$l_prev_4_long),probs=c(0.025,0.5,0.975)))
+    df4$x<-seq(1,params$nt)
+    
+    
+    
+    p2<-ggplot(df0, aes(x=x))+
+      geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="blue", alpha=0.2)+
+      geom_line(aes(y=`50%`, color="Age0_1"))+
+      geom_ribbon(data=df1,aes(ymin=`2.5%`,ymax=`97.5%`), fill="red", alpha=0.2)+
+      geom_line(data=df1,aes(y=`50%`,color="Age1_2"))+
+      geom_ribbon(data=df2,aes(ymin=`2.5%`,ymax=`97.5%`), fill="orange", alpha=0.2)+
+      geom_line(data=df2,aes(y=`50%`,color="Age2_3"))+
+      geom_ribbon(data=df3,aes(ymin=`2.5%`,ymax=`97.5%`), fill="purple", alpha=0.2)+
+      geom_line(data=df3,aes(y=`50%`, color="Age3_4"))+
+      geom_ribbon(data=df4,aes(ymin=`2.5%`,ymax=`97.5%`), fill="darkgreen", alpha=0.2)+
+      geom_line(data=df4,aes(y=`50%` ,color="Age4+"))+
+      scale_colour_manual("", 
+                          breaks = c("Age0_1", "Age1_2", "Age2_3","Age3_4","Age4+"),
+                          values = c("blue", "red", "orange","purple","darkgreen")) +
+      ylab("Seroprevalence") + xlab("Month")+ylim(0,1)
+    
+    
+    
+    
     
     # Human cases 
     mo<-seq( 2, by=1, len=length(sim$h_prev_farmer_long)-1)
@@ -187,7 +252,7 @@ plot_fits_function<-function(sim,observations){
     df_d<-data.frame(x=observations$index_mo_cases,cases=observations$cases_human_mo)
     
     
-    p2<- ggplot(data=df_s, aes(x=x))+
+    p3<- ggplot(data=df_s, aes(x=x))+
       geom_line(aes(y=cases), col="darkgreen", lwd=0.4) +
       geom_point(data =df_d, aes(x=x, y=cases) ) + theme_bw()+
       geom_vline(xintercept=which.max(df_s$cases), color="red") +
@@ -200,7 +265,7 @@ plot_fits_function<-function(sim,observations){
     df_d<-data.frame(x=observations$index_yr_cases+2007,cases=observations$cases_human_yr)
     
     
-    p3<- ggplot(data=df_s, aes(x=x))+
+    p4<- ggplot(data=df_s, aes(x=x))+
       geom_line(aes(y=cases), col="darkgreen", lwd=0.4) +
       geom_point(data =df_d, aes(x=x, y=cases) ) + theme_bw()+
       ylab("Reported cases in humans")+xlab("Year")+
@@ -212,7 +277,7 @@ plot_fits_function<-function(sim,observations){
     df_sf<- data.frame(x=seq(1:params$nt), prev=as.numeric(sim$h_prev_farmer_long))
     df_so<- data.frame(x=seq(1:params$nt), prev=as.numeric(sim$h_prev_other_long))
     
-    p4<- ggplot(data=df_sf,aes(x=x))+
+    p5<- ggplot(data=df_sf,aes(x=x))+
       geom_line(aes(y=prev, colour = "Farmers"), lwd=0.4) +
       geom_line(data=df_so, aes(y=prev,colour = "Others"), lwd=0.4) +
       scale_colour_manual("", 
@@ -266,7 +331,7 @@ plot_fits_function<-function(sim,observations){
       
       for (tt in 1:length(soil_t)){
         r_temp[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])*
-          sdata$dt$y.spline[tt]*params$sp_hz*params$D_inf_L*sim$sus_l_frac
+          sdata$dt$y.spline[tt]*params$sp_hz*params$D_inf_L*sim$sus_l_frac[jj,tt]
       }
     }
     
@@ -277,12 +342,19 @@ plot_fits_function<-function(sim,observations){
     
     
     
-    p5<-    ggplot(data=Rt,aes(x=x))+ 
+    p6<-    ggplot(data=Rt,aes(x=x))+ 
       geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="blue", alpha=0.2)+
       geom_line(aes(y=`50%`), col="blue")+
       ylab("R_t") + xlab("day")
     
-    gridExtra::grid.arrange(p1,p2,p3,p4,p5)
+    
+    
+    # Livestock prevalence over time 
+    
+    # df1<-as.data.frame(rowQuantiles((sim$),probs=c(0.025,0.5,0.975)))
+    
+    
+    gridExtra::grid.arrange(p1,p2,p3,p4,p5,p6)
     
     
     

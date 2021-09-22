@@ -9,13 +9,17 @@ get_sim_results<- function(theta){
   h_inc_year <- matrix(NA, nrow=nruns, ncol=yr_length)
   l_prev_age <- matrix(NA, nrow=nruns, ncol=5)
   l_prev_all <- matrix(NA, nrow=nruns, ncol=1)
-  sus_l_frac <- matrix(NA, nrow=nruns, ncol=mo_length)
+  sus_l_frac <- matrix(NA, nrow=nruns, ncol=mo_length) 
   h_prev_farmer <- matrix(NA, nrow=nruns, ncol=1)
   h_prev_other  <- matrix(NA, nrow=nruns, ncol=1)
   l_prev_all_long <- matrix(NA, nrow=nruns, ncol=mo_length)
   h_prev_farmer_long <- matrix(NA, nrow=nruns, ncol=mo_length)
   h_prev_other_long  <- matrix(NA, nrow=nruns, ncol=mo_length)
-  
+  l_prev_0_long <- matrix(NA, nrow=nruns, ncol=mo_length)
+  l_prev_1_long <- matrix(NA, nrow=nruns, ncol=mo_length)
+  l_prev_2_long <- matrix(NA, nrow=nruns, ncol=mo_length)
+  l_prev_3_long <- matrix(NA, nrow=nruns, ncol=mo_length)
+  l_prev_4_long <- matrix(NA, nrow=nruns, ncol=mo_length)
   
   for (jj in 1:nruns){
     
@@ -92,6 +96,13 @@ get_sim_results<- function(theta){
     L_4<-out$L_S4+out$L_I4+out$L_R4
     L_5<-out$L_S5+out$L_I5+out$L_R5
     
+    l_prev_0_long[jj,]<-c(out$L_Ri+out$L_R1)/L_1
+    l_prev_1_long[jj,]<-out$L_R2/L_2
+    l_prev_2_long[jj,]<-out$L_R3/L_3
+    l_prev_3_long[jj,]<-out$L_R4/L_4
+    l_prev_4_long[jj,]<-out$L_R5/L_5
+    
+    
     simu_age_R<-c(
       mean(out$L_R1[(field_work_start:field_work_end)]+out$L_Ri[(field_work_start:field_work_end)]),
       mean(out$L_R2[(field_work_start:field_work_end)]),
@@ -105,7 +116,7 @@ get_sim_results<- function(theta){
       mean(L_3[(field_work_start:field_work_end)]),
       mean(L_4[(field_work_start:field_work_end)]),
       mean(L_5[(field_work_start:field_work_end)]))
-    
+
     l_prev_age[jj,] <- simu_age_R / simu_age_N
     
     simu_all_R<-c(out$L_Ri+out$L_R1+out$L_R2+out$L_R3+out$L_R4+out$L_R5)
@@ -114,6 +125,11 @@ get_sim_results<- function(theta){
     simu_all_R<-mean(simu_all_R[(field_work_start:field_work_end)])
     simu_all_N<-mean(simu_all_N_long[(field_work_start:field_work_end)])
     l_prev_all[jj]<-simu_all_R/simu_all_N
+    l_prev_0_long[jj,]<-c(out$L_Ri+out$L_R1)/L_1
+    l_prev_1_long[jj,]<-out$L_R2/L_2
+    l_prev_2_long[jj,]<-out$L_R3/L_3
+    l_prev_3_long[jj,]<-out$L_R4/L_4
+    l_prev_4_long[jj,]<-out$L_R5/L_5
     
     # Human prevalence (farmers and others)
     
@@ -151,8 +167,13 @@ get_sim_results<- function(theta){
     l_prev_all_long = l_prev_all_long,
     h_prev_farmer_long = h_prev_farmer_long,
     h_prev_other_long  = h_prev_other_long,
-    sus_l_frac = sus_l_frac
-    # 
+    sus_l_frac = sus_l_frac,
+    l_prev_0_long=l_prev_0_long,
+    l_prev_1_long=l_prev_1_long,
+    l_prev_2_long=l_prev_2_long,
+    l_prev_3_long=l_prev_3_long,
+    l_prev_4_long=l_prev_4_long
+        # 
   )
   
   

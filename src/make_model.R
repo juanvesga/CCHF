@@ -13,9 +13,9 @@ make_model<-function(p){
   m[ cbind(destin, source) ] <- m[ cbind(destin, source) ]+rate
   
   # Loss of acquired immunity 
-  # source <- s$L_R; destin <- s$L_S; rate <- p$time_susceptible_livestock
-  # m[ cbind(destin, source) ] <- m[ cbind(destin, source) ]+rate
-  
+  source <- s$L_R; destin <- s$L_S; rate <- p$time_susceptible_livestock
+  m[ cbind(destin, source) ] <- m[ cbind(destin, source) ]+rate
+
 
   # Livestock immunity after infection
   source <- s$L_I; destin <- s$L_R; rate <- p$recover

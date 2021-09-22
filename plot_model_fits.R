@@ -41,19 +41,21 @@ theta<-posteriors%>%
 
 ## Run model 
 
-sim<-get_sim_results(theta)
-
-saveRDS(sim, file=here("output",country,"simulations.rds"))
+# sim<-get_sim_results(theta)
+# 
+# saveRDS(sim, file=here("output",country,"simulations.rds"))
 
 # ... or load previously saved sim results
- sim<-readRDS(here("output",country,"simulations.rds"))
+  sim<-readRDS(here("output",country,"simulations.rds"))
 # 
- pdf(here("output",country,"model_fits.pdf")) 
+ pdf(here("output",country,"model_fits_newdata_revised.pdf")) 
 
 plot_fits_function(sim,observations)
 
  dev.off() 
 
+
+ 
 
 
 

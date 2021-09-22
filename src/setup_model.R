@@ -101,12 +101,13 @@ params<-list(
     pop_st = c(0.4918, 0.2499, 0.1270, 0.0646, 0.0667),
    # pop_st = c(0.4234375, 0.2890625, 0.1375, 0.11875, 0.03125), # Mauritania
    # pop_st = pop <- c(0.2743, 0.2654, 0.186, 0.0973, 0.177),
-  mu_1=0.002643826*30, 
+   # pop_st=c(0.25714286, 0.09028571, 0.23657143, 0.25142857, 0.16457143),
+   mu_1=0.002643826*30, 
   
   #daily death rate
   # deathd = c(0.002643826,0.002643826,0.002643826,0.002643826,0.002643826),
-  deathd=c(0.07618946, 0.07436794, 0.07466935, 0.07447458, 0.07470417) , 
-  
+   deathd=c(0.07618946, 0.07436794, 0.07466935, 0.07447458, 0.07470417) , 
+  # deathd=c(1/(5*12), 1/(4*12), 1/(3*12), 1/(2*12), 1/(1*12)) , 
   # Proportion of immune livestock at t0. Source?
   #imm_t0 <- c(0.05, 0.08,0.1,0.12,0.15)*4
    imm_t0_bulgaria = c(0.29,0.48, 0.8, 0.87, 0.87), # bulgaria paper  https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4434116/ Table 2
@@ -119,7 +120,7 @@ params<-list(
   # Duration of infectiousness in livestock (in days)
   D_inf_L = 7/30,
   
-  D_lact_liv=270/30, #(days)
+  D_lact_liv=6, #(months)
   
   D_imm_liv=(5*12),
   

@@ -77,8 +77,8 @@ if(country=="AFG"){
 year_vec<-seq(2008,2019,by=1)
 
 # define the dates of the field work August 2009
-field_work_start<-(interval(temp_start_date,fwork_start) %/% months(1)) 
-field_work_end <- (interval(temp_start_date,fwork_end) %/% months(1))  
+field_work_start<-(interval(temp_start_date,fwork_start) %/% months(1))
+field_work_end <- (interval(temp_start_date,fwork_end) %/% months(1)) 
 field_work_mid <- (interval(temp_start_date,fwork_mid) %/% months(1)) 
 
 # year_work_start<- human_inc[human_inc$dates==fwork_starty,"time"] 

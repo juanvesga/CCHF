@@ -43,7 +43,7 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 # Set MCMC important parameters 
 
 chain<-"chain1.csv"
-n_iterations<-20000
+n_iterations<-5000
 
 
 ###########################################################################################################
@@ -153,19 +153,19 @@ my_posterior <- function(theta) {
 #  PART 3. Inference MCMC-MH
 ###########################################################################################################
 init.theta <-c(  
-  A=0.5546031, # driving temperature dependent force of infection
-  F_risk=0.1, # risk for farmers
-  O_factor=0.1,
-  imm_p=0.649,
-  RRreport=0.90,
-  knot1=140/30,
-  knot2=300/30,
-  beta1=0.4)#
+    A=0.54 , # driving temperature dependent force of infection
+    F_risk=0.05 , # risk for farmers
+    O_factor=0.33 ,
+    imm_p=0.97 ,
+    RRreport=0.86 ,
+    knot1=4.49 ,
+    knot2=12.23,
+    beta1= 0.57)#
      
-proposal.sd <- init.theta/10
+proposal.sd <- init.theta/12
 
 n.iterations <- n_iterations
-print.info.every <- 100
+print.info.every <- 50
 
 limits=list(lower=c(A= 0, 
                     F_risk=0,
@@ -183,11 +183,11 @@ limits=list(lower=c(A= 0,
                     RRreport=1,
                     knot1=9, 
                     knot2=14,
-                    beta1=1)) #inf!
+                    beta1=Inf)) #inf!
 
 adapt.size.start <- 500
 adapt.size.cooling <- 0.999
-adapt.shape.start <- 2000
+adapt.shape.start <- 1000
 acceptance.rate.weight <- NULL 
 acceptance.window <- NULL
 #max.scaling.sd <- 5
