@@ -103,12 +103,12 @@ sim<-get_sim_results(theta)
 # })
 
 
-  pdf(here("output",country,"model_proj_influx_inf.pdf")) 
+  # pdf(here("output",country,"model_proj_influx_inf.pdf")) 
 
 plot_fits_function(sim,observations)
 
 
-  dev.off() 
+  # dev.off() 
 
 
 
