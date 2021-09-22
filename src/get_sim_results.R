@@ -18,7 +18,11 @@ get_sim_results<- function(theta){
   s_L <- matrix(NA, nrow=nruns, ncol=mo_length)
   i_L <- matrix(NA, nrow=nruns, ncol=mo_length)
   r_L <- matrix(NA, nrow=nruns, ncol=mo_length)
-  
+  l_prev_0_long <- matrix(NA, nrow=nruns, ncol=mo_length)
+  l_prev_1_long <- matrix(NA, nrow=nruns, ncol=mo_length)
+  l_prev_2_long <- matrix(NA, nrow=nruns, ncol=mo_length)
+  l_prev_3_long <- matrix(NA, nrow=nruns, ncol=mo_length)
+  l_prev_4_long <- matrix(NA, nrow=nruns, ncol=mo_length)
   
   for (jj in 1:nruns){
     
@@ -95,6 +99,13 @@ get_sim_results<- function(theta){
     L_4<-out$L_S4+out$L_I4+out$L_R4
     L_5<-out$L_S5+out$L_I5+out$L_R5
     
+    l_prev_0_long[jj,]<-c(out$L_Ri+out$L_R1)/L_1
+    l_prev_1_long[jj,]<-out$L_R2/L_2
+    l_prev_2_long[jj,]<-out$L_R3/L_3
+    l_prev_3_long[jj,]<-out$L_R4/L_4
+    l_prev_4_long[jj,]<-out$L_R5/L_5
+    
+    
     simu_age_R<-c(
       mean(out$L_R1[(field_work_start:field_work_end)]+out$L_Ri[(field_work_start:field_work_end)]),
       mean(out$L_R2[(field_work_start:field_work_end)]),
@@ -165,7 +176,12 @@ get_sim_results<- function(theta){
     sus_l_frac = sus_l_frac,
     s_L=s_L,
     i_L=i_L,
-    r_L=r_L
+    r_L=r_L,
+    l_prev_0_long=l_prev_0_long,
+    l_prev_1_long=l_prev_1_long,
+    l_prev_2_long=l_prev_2_long,
+    l_prev_3_long=l_prev_3_long,
+    l_prev_4_long=l_prev_4_long
     
     # 
   )

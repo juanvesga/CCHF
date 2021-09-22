@@ -33,7 +33,7 @@ goveqs_basis <- function (t, state, parameters) {
                         s$livestock-1,
                         s$prevalent_l-1,
                         i$L_Ri-1,
-                        s$L_S-1,
+                        s$infectious_l-1,
                         pop_st,
                         agg$inc,
                         agg$mort,
