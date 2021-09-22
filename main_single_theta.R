@@ -69,7 +69,7 @@ if (test_mode==1){
     F_risk=0.1, # risk for farmers
     O_factor=0.1,
     imm_p=0.649,
-    animal_in=1000,
+    animal_in=20000,
     knot1=140/30,
     knot2=300/30,
     beta1=0.4)#

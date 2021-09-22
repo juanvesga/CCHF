@@ -289,7 +289,7 @@ plot_fits_function<-function(sim,observations){
     names(df)<-c("month","S","I","R")
     df_melt<-reshape2::melt(df,id="month")
     
-    p6<-ggplot(data=df_melt,aes(x=month,y=value))+
+    p6<-ggplot(data=df_melt[df_melt$variable=="I",],aes(x=month,y=value))+
       geom_line(aes(color=variable))+
       ylab("Number") + xlab("month")
       
