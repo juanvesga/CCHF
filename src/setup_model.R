@@ -24,7 +24,7 @@ groups<-list(states2,gps$occ)
 ref<-  get_addresses(groups, ref$i, ref$s, ref$i$nstates)
 
 # Include the auxiliaries
-auxnames <- c('inc','mort' )
+auxnames <- c('inc','mort')
 auxinds  <- c(  3  , 1    )
 ref$i$aux<-list()
 lim_all<-ref$i$nstates
@@ -62,13 +62,13 @@ check<-tmp - diag(diag(tmp))
 #  Incidence: 1.livestock 2.farmer 3. other
 tmp <- matrix(0,3,ref$i$nstates)
 tmp[1,ref$s$L_I] <- 1
-tmp[2,ref$i$E$farmer] <- 1
-tmp[3,ref$i$E$other] <- 1
+tmp[2,ref$i$I$farmer] <- 1
+tmp[3,ref$i$I$other] <- 1
 agg <-list(inc= tmp)
 
 tmp <-matrix(0,ref$i$nstates,ref$i$nstates)
 tmp[ref$s$L_I,] <- 1
-tmp[ref$s$E,] <- 1
+tmp[ref$s$I,] <- 1
 tmp<-tmp*check
 sel<-list(inc= tmp - diag(diag(tmp)))
 
