@@ -30,7 +30,7 @@ library(broom)
 library(psych)
 
 country<- "AFG"
-test_mode=1 # Set to 1 to run test parameter values
+test_mode=0 # Set to 1 to run test parameter values
 
 ########################################################################################
 # Part 1. Import set up: Load data and model parameters and functions

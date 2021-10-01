@@ -23,7 +23,7 @@ if(country=="AFG"){
   fwork_midy <-as.Date("2009-02-28")
   format_date<-"%d/%m/%Y"
   
-  years_fit<-seq(2009,2016,1)
+  
   
   # Get weekly data to montly 
   human_inc1 <- read.csv(here("data",country,"cchf_human_weekly2008.csv"), header=TRUE)#, sep=,)
@@ -58,8 +58,10 @@ if(country=="AFG"){
   
   human_year<-human_year%>%
     mutate(cases=ifelse(cases==0,NA,as.numeric(paste(cases))))
+  human_year<-human_year[human_year$year>=2015,]
   
-
+  years_fit<-human_year$year
+  
 }else if(country=="SA"){ 
   temp_start_date <-as.Date("2016-01-01")
   end_date<- as.Date("2017-12-31")
@@ -174,18 +176,32 @@ observations<-list(
   
 )
 
+tmp<-data.frame(
+  time=c(observations$index_mo_cases,observations$index_yr_cases*12),
+  obs=c(observations$cases_human_mo,observations$cases_human_yr)
+)
+data1_human <- tmp[order(tmp$time),]
+
+data2_human<-data.frame(
+  time=c(field_work_start:field_work_end),
+  num_f=observations$prev_farmer_Posa,
+  deno_f=observations$prev_farmer_denoma,
+  num_o=observations$prev_other_Posa,
+  deno_o=observations$prev_other_denoma)
+
 
 
 
 #Functions
 
 # Find FOI factor according to Soil temperature
+temp_cap<-30
 temp_foi_func<-function(celsius,temp_foi_factor,min_limit=min(soil_t)){
-  if (celsius<=30){
+  if (celsius<=temp_cap){
     x<-(temp_foi_factor*(celsius - min_limit))
 
-  }else if(celsius>30){
-    x<-temp_foi_factor*(30-(celsius-30)-min_limit)
+  }else if(celsius>temp_cap){
+    x<-temp_foi_factor*(temp_cap-(celsius-temp_cap)-min_limit)
   }
   return(x)
 }

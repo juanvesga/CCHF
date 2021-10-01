@@ -34,25 +34,25 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 ##################################
 
 # Load posterior samples
-posteriors <- read.table(here("output",country,"posteriors.txt"), sep = "\t" )
+posteriors <- read.table(here("output",country,"posteriors_combined.txt"), sep = "\t" )
 theta<-posteriors%>%
   select(A,F_risk, O_factor,imm_p,RRreport,knot1, knot2, beta1)
 
 
 ## Run model 
 
-# sim<-get_sim_results(theta)
+ sim<-get_sim_results(theta)
 # 
 # saveRDS(sim, file=here("output",country,"simulations.rds"))
 
 # ... or load previously saved sim results
-  sim<-readRDS(here("output",country,"simulations.rds"))
+  sim<-readRDS(here("output",country,"simulations_combined.rds"))
 # 
- pdf(here("output",country,"model_fits_newdata_revised.pdf")) 
+ # pdf(here("output",country,"model_fits_newdata_revised.pdf")) 
 
 plot_fits_function(sim,observations)
 
- dev.off() 
+ # dev.off() 
 
 
  

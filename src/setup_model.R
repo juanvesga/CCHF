@@ -133,9 +133,9 @@ params<-list(
   #7615
   
   # Proportion of farmers immune at time 0. from data
-  prop_F_R= 0.133333, # 0.0952
+  prop_F_R= 0.095,#0.133333, # 0.0952
   # Proportion of other occupations immune at time 0. from data
-  prop_O_R= 0.046875, ###0.0411
+  prop_O_R= 0.041,#0.046875, ###0.0411
   
   # Reporting fraction. fraction of human infections reported by the surveillance system. Source?
   RR = 0.10,
