@@ -24,7 +24,10 @@ library(here)
 library (Rcpp)
 library(profvis)
 library(matrixStats)
-
+library(splines)
+library(data.table)
+library(broom)
+library(psych)
 
 country<- "AFG"
 test_mode=0 # Set to 1 to run test parameter values
@@ -37,6 +40,8 @@ source(here("src","setup_data.R"))
 source(here("src","setup_model.R"))
 source(here("src","get_sim_results.R"))
 source(here("src","plot_fits_function.R"))
+source(here("src","spline_functions.R"))
+
 
 
 #Rcpp vectorized functions
@@ -60,43 +65,53 @@ sourceCpp(here("src","compute_model_arma.cpp"))
 ###########################################################################################################
 if (test_mode==1){
   theta <- data.frame(
-    A=0.076, # driving temperature dependent force of infection
-    F_risk=0.54 , # risk for farmers
-    O_factor=0.45,
-    imm_p=0.6)
+    A=0.5 , # driving temperature dependent force of infection
+    F_risk=0.063 , # risk for farmers
+    O_factor=0.34 ,
+    imm_p=0.9 ,
+    RRreport=0.99 ,
+    knot1=7.167447 ,
+    knot2=11.92054,
+    beta1= 0.7999928)#
+    
 }else{
 
 # Load posterior samples
-posteriors <- read.table(here("output",country,"posteriors.txt"), sep = "\t" )
+posteriors <- read.table(here("output",country,"posteriors_newdata.txt"), sep = "\t" )
 
 theta_in<-posteriors%>%
-  select(A,F_risk, O_factor, imm_p)
+  select(A,F_risk, O_factor, imm_p,RRreport, knot1, knot2, beta1)
 
 theta <- data.frame(
   A= median(theta_in$A)	, # driving temperature dependent force of infection
   F_risk=median(theta_in$F_risk)	, # risk for farmers
   O_factor=median(theta_in$O_factor),
-  imm_p=median(theta_in$imm_p))#
-
-
+  imm_p=median(theta_in$imm_p),
+  RRreport=median(theta_in$RRreport),
+  knot1=median(theta_in$knot1),
+  knot2=median(theta_in$knot2),
+  beta1=median(theta_in$beta1)
+  )#
 }
 
 
-
+# profvis({  
 
 sim<-get_sim_results(theta)
+
+ 
+# })
+
 
  # pdf(here("output",country,"model_proj_3motickcycle.pdf")) 
 
 plot_fits_function(sim,observations)
 
+
  # dev.off() 
 
 
 
-
-
-
-
-
+  
+  
 

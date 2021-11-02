@@ -8,14 +8,14 @@ make_model<-function(p){
   m <- matrix(0,i$nstates,i$nstates)
   
   
-  # Lost of passive immunity (~ to average lactation period)
+  # Loss of passive immunity (~ to average lactation period)
   source <- s$L_Ri; destin <- intersect(s$L_S,s$a1); rate <- p$time_passimm_loss_livestock
   m[ cbind(destin, source) ] <- m[ cbind(destin, source) ]+rate
   
-  # Lost of acquired immunity 
+  # Loss of acquired immunity 
   source <- s$L_R; destin <- s$L_S; rate <- p$time_susceptible_livestock
   m[ cbind(destin, source) ] <- m[ cbind(destin, source) ]+rate
-  
+
 
   # Livestock immunity after infection
   source <- s$L_I; destin <- s$L_R; rate <- p$recover
@@ -71,9 +71,14 @@ make_model<-function(p){
   
   # --- Getting force-of-infection for all groups
   tmp <-matrix(0,3,i$nstates)    # 1.Livestock, 2.Farmer, 3.Other
-  tmp[1,s$L_I]  <- 1 - exp(-(1/(p$D_inf_L*p$N_liv)))
-  tmp[2,s$L_I]  <- 1 - exp((-p$theta[["F_risk"]]/1e6))
-  tmp[3,s$L_I]  <- 1 - exp((-p$risk_O/1e6))
+  # tmp[1,s$L_I]  <- 1 - exp(-(1/(p$D_inf_L*p$N_liv)))
+  # tmp[2,s$L_I]  <- 1 - exp((-p$theta[["F_risk"]]/1e6))
+  # tmp[3,s$L_I]  <- 1 - exp((-p$risk_O/1e6))
+   tmp[1,s$L_I]  <- 1
+   tmp[2,s$L_I]  <- p$theta[["F_risk"]]
+   tmp[3,s$L_I]  <- p$risk_O
+  
+  
   
   M$lambda <- tmp
   
