@@ -50,7 +50,7 @@ if(country=="AFG"){
     mutate(cases=ifelse(cases==0,NA,as.numeric(paste(cases))))
   
   # Get Yearly data 
-  human_inc3 <- read.csv(here("data",country,"cchf_human_yearly2009_2016.csv"), header=TRUE)
+  human_inc3 <- read.csv(here("data",country,"cchf_human_yearly2009_2018.csv"), header=TRUE)
   human_inc3$date<- as.Date(human_inc3$date, format="%d/%m/%Y")
   human_inc3$year<-strftime(human_inc3$date, format = "%Y")
   human_year<-human_inc3%>%
@@ -58,9 +58,27 @@ if(country=="AFG"){
   
   human_year<-human_year%>%
     mutate(cases=ifelse(cases==0,NA,as.numeric(paste(cases))))
-  human_year<-human_year[human_year$year>=2015,]
+  human_year<-human_year[human_year$year>=2008,]
   
   years_fit<-human_year$year
+  
+  
+  # Get Yearly deaths data 
+  human_mrt <- read.csv(here("data",country,"cchf_humanDeaths_yearly2008_2018.csv"), header=TRUE)
+  human_mrt$date<- as.Date(human_mrt$date, format="%d/%m/%Y")
+  human_mrt$year<-strftime(human_mrt$date, format = "%Y")
+  humanD_year<-human_mrt%>%
+    rename(deaths=obs)
+  
+  humanD_year<-humanD_year%>%
+    mutate(deaths=ifelse(deaths==0,NA,as.numeric(paste(deaths))))%>%
+    select(date,year,deaths)
+  
+  humanD_year<-humanD_year[humanD_year$year>=2008,]
+  
+  yearsD_fit<-humanD_year$year
+  
+  
   
 }else if(country=="SA"){ 
   temp_start_date <-as.Date("2016-01-01")
@@ -132,9 +150,74 @@ soil_t<- temp_month$soil_t
 # Spring08 <- spring_2008_start_date
 
 
+##Relative humidity 
+rel_hum<- read.csv(here("data",country,'relativeHum_AFG_2008_2020.csv'), header=TRUE, sep=',')
+rel_hum$date <- strftime(rel_hum$vector_month,  format = "%Y-%m")
+id<- rel_hum$date %in% temp_day$month 
+rel_hum <- rel_hum[id ,]
+
+rh<-rel_hum$rh
+
+
+## Air temp
+airT<- read.csv(here("data",country,'air_temp_AFG_2008_2020.csv'), header=TRUE, sep=',')
+airT$date <- strftime(airT$vector_month,  format = "%Y-%m")
+id<- airT$date %in% temp_day$month 
+airT <- airT[id ,]
+
+air_temp<-airT$Temperature
+
+
+
+# Satur Deficit
+
+sat_def  <- (1-rh)*4.9463*exp(0.0621*(air_temp))
+df<- data.frame(x=air_temp, y=sat_def)
+fit3<- lm(y~poly(x,3,raw=TRUE), data=df)
+
+# fit1 <- lm(y~x, data=df)
+# fit2 <- lm(y~poly(x,2,raw=TRUE), data=df)
+# fit3 <- lm(y~poly(x,3,raw=TRUE), data=df)
+# fit4 <- lm(y~poly(x,4,raw=TRUE), data=df)
+# fit5 <- lm(y~poly(x,5,raw=TRUE), data=df)
+# 
+# #create a scatterplot of x vs. y
+# plot(df$x, df$y, pch=19, xlab='x', ylab='y')
+# 
+# #define x-axis values
+# x_axis <- seq(0, 40, length=80)
+# 
+# #add curve of each model to plot
+# lines(x_axis, predict(fit1, data.frame(x=x_axis)), col='green')
+# lines(x_axis, predict(fit2, data.frame(x=x_axis)), col='red')
+# lines(x_axis, predict(fit3, data.frame(x=x_axis)), col='purple')
+# lines(x_axis, predict(fit4, data.frame(x=x_axis)), col='blue')
+# lines(x_axis, predict(fit5, data.frame(x=x_axis)), col='orange')
+# 
+# plot(df$x, df$y, pch=19, 
+#      ylab="Saturation Deficit (mbar)", 
+#      xlab="Air Temperature (C)",
+#      main="Herat, Afghanistan (2008 to 2018 data)",
+#      ylim=c(0,10))
+# lines(x_axis, predict(fit3, data.frame(x=x_axis)), col='purple',lwd=2)
+
+
+# NDVI (normalised difference vegetation index)
+
+
+NDVI<- read.csv(here("data",country,'ndvi.csv'), header=TRUE, sep=',')
+id<- NDVI$vector_month %in% temp_day$month 
+NDVI <- NDVI[id ,]
+ndvi<-NDVI$ndvi * 100
+
+
+
+
 
 # Index for monthly human cases
 tmp<-which(!is.na(human_month$cases))
+
+
 
 
 
@@ -147,7 +230,9 @@ observations<-list(
   cases_human_mo = human_month$cases[tmp],
   
   index_yr_cases=which(year_vec%in%years_fit),
+  index_yr_deaths=which(year_vec%in%yearsD_fit),
   cases_human_yr = human_year$cases,
+  deaths_human_yr = humanD_year$deaths,
   
   prev_liv_age_pos_IgG=prev_liv$pos_igg,
   prev_liv_age_denom=prev_liv$denom,
@@ -190,23 +275,109 @@ data2_human<-data.frame(
   deno_o=observations$prev_other_denoma)
 
 
-
+# browser()
+# 
+# plot(100-rh*100,type="l",ylim=c(0,100))
+# lines(soil_t,col="red")
+# lines(sat_def,col="blue")
+# lines(ndvi,col="green")
 
 #Functions
 
 # Find FOI factor according to Soil temperature
 temp_cap<-30
-temp_foi_func<-function(celsius,temp_foi_factor,min_limit=min(soil_t)){
-  if (celsius<=temp_cap){
-    x<-(temp_foi_factor*(celsius - min_limit))
-
-  }else if(celsius>temp_cap){
-    x<-temp_foi_factor*(temp_cap-(celsius-temp_cap)-min_limit)
+temp_threshold <-12
+if (driver=="sat_def"){
+  
+  environment_factor<- sat_def
+  
+  temp_threshold <-as.numeric(predict(fit3, data.frame(x=12)))
+  
+  temp_cap<- as.numeric(predict(fit3, data.frame(x=30)))
+  
+  envrdriver_foi_func<-function(y,temp_foi_factor,min_limit=min(sat_def)){
+    
+    if (y >= temp_threshold){
+      
+      x<- (temp_foi_factor*(min(y,temp_cap) - min_limit))
+      
+    }else if(y < temp_threshold){
+      
+      x<- temp_foi_factor*1
+    }
+    
+    return(x)
   }
-  return(x)
+  
+} else if(driver=="soil_t"){
+  
+  environment_factor<- soil_t
+  
+  envrdriver_foi_func<-function(y,temp_foi_factor,min_limit=min(soil_t)){
+    
+    if (y >= temp_threshold){
+      
+      x<-(temp_foi_factor*(min(y,temp_cap) - min_limit))
+      
+    }else if(y < temp_threshold){
+      
+      x<- temp_foi_factor*1
+    }
+    
+    
+    return(x)
+  }
+} else if(driver=="ndvi"){
+  
+  environment_factor<- ndvi
+  
+  envrdriver_foi_func<-function(y,temp_foi_factor,min_limit=min(ndvi)){
+    
+      x<-temp_foi_factor*(y - min_limit)
+
+    return(x)
+  }
+} else if(driver=="rel_hum"){
+  
+  environment_factor<- (1-rh)*100
+  
+  envrdriver_foi_func<-function(y,temp_foi_factor,min_limit=min(ndvi)){
+    
+    x<-temp_foi_factor*(y - min_limit)
+    
+    return(x)
+  }
 }
+# ONly relartive humidity
+# temp_foi_func<-function(celsius,rh,temp_foi_factor,min_limit=min(soil_t)){
 # 
-# temp_foi_func<-function(celsius,temp_foi_factor,min_limit=min(soil_t)){
-#   x<-(temp_foi_factor*(min(celsius,30) - min_limit))
+#   return(rh)
+# }
+# Process temp caps and lows and then generate Satur Deficit
+
+
+# temp_foi_func<-function(celsius,rh,temp_foi_factor,min_limit=min(soil_t)){
+#   if (celsius<=temp_cap){
+#     x<-(temp_foi_factor*((celsius+1) - min_limit))#*rh
+# 
+#   }else if(celsius>temp_cap){
+#     x<-temp_foi_factor*(temp_cap-(celsius-temp_cap)-min_limit)#*rh
+#   }
 #   return(x)
+# }
+# 
+# temp_foi_func<-function(celsius,rh,temp_foi_factor,min_limit=min(soil_t)){
+#   x<-(temp_foi_factor*(min(celsius,30) - min_limit))#*rh
+#   return(x)
+# }
+
+# temp_foi_func<-function(celsius,rh,temp_foi_factor,min_limit=min(soil_t)){
+#   
+# 
+# if(celsius<=30) {
+#   Rtemp_L<- temp_foi_factor*((celsius+1) - min_limit) * rh #theta[["B"]]
+# } else {
+#   Rtemp_L<-temp_foi_factor*(30 - min_limit) * rh
+# }
+#   return(Rtemp_L)
 # }

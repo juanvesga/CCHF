@@ -1,6 +1,6 @@
-plot_fits_function<-function(sim,observations){
+plot_fits_function<-function(sim,observations, to_save=0){
   
-  windows()
+  
   
   # if (nrow(sim$h_inc_month)>1)
   #   # #################################################################
@@ -93,8 +93,7 @@ plot_fits_function<-function(sim,observations){
   for (jj in 1:nrow(theta) ){
     
     for (tt in 1:length(soil_t)){
-      r_temp_livestock[tt,jj]<-temp_foi_func(soil_t[tt],theta$A[jj])*
-        params$D_inf_L*sim$sus_l_frac[jj,tt]
+       r_temp_livestock[tt,jj]<-envrdriver_foi_func(environment_factor[tt],theta$A[jj])*sim$sus_l_frac[jj,tt]
       
     }
   }
@@ -107,19 +106,18 @@ plot_fits_function<-function(sim,observations){
   p3 <- ggplot(data=Rtl,aes(x=x))+ 
     geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`, color=group), alpha=0.3)+
     geom_line(aes(y=`50%`, color=group))+
-    ylab("R_t") + xlab("day")
+    ylab("R_t") + xlab("day")+xlim(1,130) +ylim(0,10)
   
   
-  
-  
+ 
   ################## Human reported cases 
   mo<-seq( 1, by=1, len=ncol(sim$h_prev_farmer_long))
-  df_s <-as.data.frame(rowQuantiles(t((sim$h_inc_mo)),
+  df_s <-as.data.frame(rowQuantiles(t((sim$h_incidence_reported_month)),
                                     probs=c(0.025,0.5,0.975)))
   df_s$x<-mo
   df_d<-data.frame(x=observations$index_mo_cases,cases=observations$cases_human_mo)
   
-  df_sim<-data.frame(x=mo, t(sim$h_inc_mo))
+  df_sim<-data.frame(x=mo, t(sim$h_incidence_reported_month))
   dat_sim<-reshape2::melt(df_sim, id="x")
   
   p4<- ggplot(data=df_s, aes(x=x))+
@@ -129,16 +127,16 @@ plot_fits_function<-function(sim,observations){
     geom_line(aes(y=`50%`), col="darkgreen", lwd=0.4) +
     geom_point(data =df_d, aes(x=x, y=cases) ) + theme_bw()+
     # geom_vline(xintercept=which.max(df_s$`50%`), color="red") +
-    xlab("Month")+ylab("Monthly cases Reported in humans")+xlim(110,129)
+    xlab("Month")+ylab("Monthly cases Reported in humans")
   
   
   ####################### Human reported cases yearly 
   yr<-seq( 1, by=1, len=length(unique(as.Date(temp_month$month,format="%Y"))))+2007
-  df_s <-as.data.frame(rowQuantiles(t((sim$h_inc_year)),
+  df_s <-as.data.frame(rowQuantiles(t((sim$h_incidence_reported_year)),
                                     probs=c(0.025,0.5,0.975)))
   df_s$x<-yr
   df_d<-data.frame(x=observations$index_yr_cases+2007,cases=observations$cases_human_yr)
-  df_sim<-data.frame(x=yr, t(sim$h_inc_year))
+  df_sim<-data.frame(x=yr, t(sim$h_incidence_reported_year))
   dat_sim<-reshape2::melt(df_sim, id="x")
   
   p5<- ggplot(data=df_s, aes(x=x))+
@@ -147,8 +145,7 @@ plot_fits_function<-function(sim,observations){
     geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="darkgreen", alpha=0.2)+
     geom_line(aes(y=`50%`), col="darkgreen", lwd=0.4) +
     geom_point(data =df_d, aes(x=x, y=cases) ) + theme_bw()+
-    xlab("Year")+ylab("Cases Reported in humans")+
-    xlim(2008, 2018)
+    xlab("Year")+ylab("Cases Reported in humans")
   
   ##=========== Prevalence in farmers and others
   df_sf <- as.data.frame(rowQuantiles(t(sim$h_prev_farmer_long),probs=c(0.025,0.5,0.975)))
@@ -173,9 +170,81 @@ plot_fits_function<-function(sim,observations){
   
   
   
+  ####################### Human fatalities yearly 
+  yr<-seq( 1, by=1, len=length(unique(as.Date(temp_month$month,format="%Y"))))+2007
+  df_s <-as.data.frame(rowQuantiles(t((sim$h_fatality_year)),
+                                    probs=c(0.025,0.5,0.975)))
+  df_s$x<-yr
+  df_d<-data.frame(x=observations$index_yr_deaths+2007,cases=observations$deaths_human_yr)
+  df_sim<-data.frame(x=yr, t(sim$h_fatality_year))
+  dat_sim<-reshape2::melt(df_sim, id="x")
   
-  gridExtra::grid.arrange(p1,p2,p3,p4,p5,p6)
+  p7<- ggplot(data=df_s, aes(x=x))+
+    geom_line(data=dat_sim, aes(x=x, y=value, group=variable), col="grey", 
+              alpha=0.2, lwd=0.4) +
+    geom_ribbon(aes(ymin=`2.5%`,ymax=`97.5%`), fill="darkgreen", alpha=0.2)+
+    geom_line(aes(y=`50%`), col="darkgreen", lwd=0.4) +
+    geom_point(data =df_d, aes(x=x, y=cases) ) + theme_bw()+
+    xlab("Year")+ylab("CCHF fatal cases in humans")+
+    xlim(2008, 2018)
   
+  
+  ################## Human spectrum of incidence 
+  
+
+  df_d<-data.frame(x=observations$index_mo_cases,cases=observations$cases_human_mo)
+  mo<-seq( 1, by=1, len=ncol(sim$h_prev_farmer_long))
+  #reported
+  df_rep <-as.data.frame(rowQuantiles(t((sim$h_incidence_reported_month)),
+                                    probs=c(0.025,0.5,0.975)))
+  df_rep$x<-mo
+  # Symptomatic
+  df_clin <-as.data.frame(rowQuantiles(t((sim$h_incidence_clinical_month)),
+                                      probs=c(0.025,0.5,0.975)))
+  df_clin$x<-mo
+  # All incidence
+  df_all <-as.data.frame(rowQuantiles(t((sim$h_incidence_month)),
+                                       probs=c(0.025,0.5,0.975)))
+  df_all$x<-mo
+
+  longx<-seq( 1,ncol(sim$h_prev_farmer_long), by=1/30)
+  
+  df_all2<-approxm(df_all,length(longx),"linear")
+  df_rep2<-approxm(df_rep,length(longx),"linear")
+  df_clin2<-approxm(df_clin,length(longx),"linear")
+  
+  
+  
+  
+  p8<- ggplot(data=df_all2, aes(x=x))+
+    geom_ribbon(aes(ymin=`2.5%`*0,ymax=`97.5%`, fill="All"), alpha=1)+
+    geom_ribbon(data=df_clin2,aes(ymin=`2.5%`*0,ymax=`97.5%`, fill="Clinical"), alpha=1)+
+    geom_ribbon(data=df_rep2,aes(ymin=`2.5%`*0,ymax=`97.5%`, fill="Reported"), alpha=1)+
+    geom_point(data =df_d, aes(x=x, y=cases) ) + theme_bw()+
+    xlim(0,130)+
+    scale_fill_manual("Incidence",values=c("All"="dodgerblue4", "Clinical"="grey52", "Reported"="orange3"))+
+    xlab("Month")+ylab("Incidence")
+  
+  
+  
+  
+  if(to_save==0){
+    windows()
+  }
+  
+  gridExtra::grid.arrange(p1,p2,p3)
+  
+  if(to_save==0){
+    windows()
+  }
+  
+  gridExtra::grid.arrange(p4,p5,p6,p7)
+  
+  if(to_save==0){
+    windows()
+  }
+  
+  gridExtra::grid.arrange(p8)
   
   
 }

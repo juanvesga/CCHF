@@ -27,12 +27,12 @@ country<- "AFG"
 
 
 burn<- 0.5 # at what point in trace to chop burn-in runs
-thin_n<- 2 # sample every n runs (reduce autocorrelation) 
+thin_n<- 10 # sample every n runs (reduce autocorrelation) 
 # analyse MCMC samples
 
 
 # Import chains
-trace1_1 <- read.csv(here("output",country,"trace_chain1_stoch.csv"))
+trace1_1 <- read.csv(here("output",country,"trace_chain4_combinedMCMC.csv"))
 trace1_2 <- read.csv(here("output",country,"trace_chain3.csv"))
 
 ######################################################################
@@ -73,7 +73,7 @@ trace_both <- mcmc(df_both)
 autocorr.plot(df_both)
 plot(trace_both)
 
-write.table(df1_1, here("output",country,"posteriors_stoch.txt"), sep = "\t" )
+write.table(df1_1, here("output",country,"posteriors_combMCMC.txt"), sep = "\t" )
 #####################################################################################
 windows()
 plot(mcmc.trace1_1)

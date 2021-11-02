@@ -112,7 +112,7 @@ params<-list(
   #imm_t0 <- c(0.05, 0.08,0.1,0.12,0.15)*4
    imm_t0_bulgaria = c(0.29,0.48, 0.8, 0.87, 0.87), # bulgaria paper  https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4434116/ Table 2
    # imm_t0 = c(0.3,0.3, 0.3, 0.3, 0.3), # bulgaria paper  https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4434116/ Table 2
-  
+  imm_t0=c(0.29,0.48, 0.8, 0.87, 0.87)*0.5,
   #imm_t0<- prev_liv$imm_t0
   # Transovarial transmission for seeding infection every year on April 1st
   TOT = 1,
@@ -139,6 +139,7 @@ params<-list(
   
   # Reporting fraction. fraction of human infections reported by the surveillance system. Source?
   RR = 0.10,
+  RRreport=0.75, # Increse of reporting over the yeras (2013 to 2019)
   
   # Latent period in humans in days (to calculate the rate at which human move from latent to infectious)
   D_lat_H = 4/30,
@@ -148,12 +149,27 @@ params<-list(
   D_imm_H = 10*12,
   # case fatality rate
   CFR = 0.33,
-  
+  # Clinical fraction
+  clin_frac = 1-0.8, # Turkey data (Bodur et al.) 
   # mortality and birth rates in human for constant pop size
   L = 61.5, # life span in years  between 2008 and 2014 https://data.worldbank.org/indicator/SP.DYN.LE00.IN?locations=AF 
   b_d = (1/(61.5*12)), # daily birth and death rate for constant pop 
   
-  sp_hz=10 # spline hazard multiplier. This value will be multiplied by spline 
+  sp_hz=10, # spline hazard multiplier. This value will be multiplied by spline 
+  
+  
+  ## baseline vaccination paramts
+  # Baseline conditions
+  start_vax= 70, 
+  stop_vax = 73,
+  vacc_eff = 0.9,
+  time_imm = 0.5,
+  pop_coverage_f = 0,
+  pop_coverage_o = 0,
+  p_vacc_livestock= 0,
+  liv_vacc_yearly=FALSE
+  
+  
 )
 
 # Rate at which livestock and humans becomes infectious and immune
@@ -163,7 +179,7 @@ params$time_immune_human <- 1/params$D_inf_H # rate at which infectious human be
 params$time_susceptible_human <- 1/params$D_imm_H # rate at which humans become susceptible again
 params$time_passimm_loss_livestock<- 1/params$D_lact_liv # rate of moving from passive immnity at birth to susceptible
 params$time_susceptible_livestock<- 1/params$D_imm_liv # rate of moving from passive immnity at birth to susceptible
-
+params$time_protection<- 1/params$time_imm
 # Added parameters defined with others 
 params$indices_infL<- c(6,7,8,9,10)-1
 params$indices_livestock<-seq(1,15)-1
@@ -178,7 +194,7 @@ params$Birth_F <- params$N_F*params$b_d
 params$Birth_O <- params$N_O*params$b_d
 params$Birth <-sum(params$pop_st*params$deathd) 
 params$Ageing <- (1-params$deathd)/12
-params$recover <- (1-params$deathd-params$Ageing)*params$time_immune_livestock
+params$recover <- params$time_immune_livestock# (1-params$deathd-params$Ageing)*params$time_immune_livestock
 
 # pass references
 params$ref<-ref
